@@ -113,6 +113,9 @@
     <ClCompile Include="..\..\src\simulation\physics.cpp">
       <Filter>來源檔案\simulation</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\simulation\mPlane.cpp">
+      <Filter>來源檔案\simulation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\context_manager.h">
@@ -185,6 +188,9 @@
       <Filter>標頭檔\simulation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\simulation\physics.h">
+      <Filter>標頭檔\simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\simulation\mPlane.h">
       <Filter>標頭檔\simulation</Filter>
     </ClInclude>
   </ItemGroup>
