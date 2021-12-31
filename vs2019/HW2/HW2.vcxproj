@@ -208,6 +208,7 @@
     <ClCompile Include="..\..\src\shape\sphere.cpp" />
     <ClCompile Include="..\..\src\simulation\cueBall.cpp" />
     <ClCompile Include="..\..\src\simulation\physics.cpp" />
+    <ClCompile Include="..\..\src\simulation\mPlane.cpp" />
     <ClCompile Include="..\..\src\texture\cubemap.cpp" />
     <ClCompile Include="..\..\src\texture\shadow.cpp" />
     <ClCompile Include="..\..\src\texture\texture.cpp" />
@@ -232,6 +233,7 @@
     <ClInclude Include="..\..\include\shape\sphere.h" />
     <ClInclude Include="..\..\include\simulation\cueBall.h" />
     <ClInclude Include="..\..\include\simulation\physics.h" />
+    <ClInclude Include="..\..\include\simulation\mPlane.h" />
     <ClInclude Include="..\..\include\texture\cubemap.h" />
     <ClInclude Include="..\..\include\texture\shadow.h" />
     <ClInclude Include="..\..\include\texture\texture.h" />

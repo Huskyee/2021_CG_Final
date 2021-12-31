@@ -301,6 +301,7 @@ int main() {
     glClear(GL_DEPTH_BUFFER_BIT);
 
     /* ===== Do Physics Simulation here ===== */
+    physics.resolveCollision();
     physics.computeAllForce();
     physics.integrate();
     /* ====================================== */
