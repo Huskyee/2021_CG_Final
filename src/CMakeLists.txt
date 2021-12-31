@@ -18,6 +18,9 @@ set(HW2_SOURCE
   ${HW2_SOURCE_DIR}/texture/shadow.cpp
   ${HW2_SOURCE_DIR}/texture/texture.cpp
   ${HW2_SOURCE_DIR}/texture/texture2d.cpp
+  ${HW2_SOURCE_DIR}/simulation/cueBall.cpp
+  ${HW2_SOURCE_DIR}/simulation/mPlane.cpp
+  ${HW2_SOURCE_DIR}/simulation/physics.cpp
   ${HW2_SOURCE_DIR}/main.cpp
 )
 
@@ -44,6 +47,9 @@ set(HW2_HEADER
   ${HW2_INCLUDE_DIR}/texture/shadow.h
   ${HW2_INCLUDE_DIR}/texture/texture.h
   ${HW2_INCLUDE_DIR}/texture/texture2d.h
+  ${HW2_INCLUDE_DIR}/simulation/cueBall.h
+  ${HW2_INCLUDE_DIR}/simulation/mPlane.h
+  ${HW2_INCLUDE_DIR}/simulation/physics.h
   ${HW2_INCLUDE_DIR}/utils.h
 
 )
