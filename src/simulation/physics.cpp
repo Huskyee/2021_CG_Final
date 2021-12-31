@@ -1,8 +1,6 @@
 #include "simulation/physics.h"
 #include "simulation/mPlane.h"
 
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/constants.hpp>
 
 //glm::vec3 position_list[16] = {
 //    glm::vec3(0.0f, 3.0f, 0.0f),
@@ -23,13 +21,26 @@
 //    glm::vec3(15.0f, 3.0f, 0.0f),
 //};
 
-glm::vec3 position_list[16] = {
-    glm::vec3(0.0f, 3.0f, 0.0f),  glm::vec3(1.0f, 3.0f, 0.0f),  glm::vec3(2.0f, 3.0f, 0.0f),
-    glm::vec3(2.0f, 5.0f, 0.0f),  glm::vec3(3.0f, 4.0f, 0.0f),  glm::vec3(4.0f, 4.0f, 0.0f),
-    glm::vec3(4.0f, 10.0f, 0.0f),  glm::vec3(5.0f, 5.0f, 0.0f),  glm::vec3(6.0f, 5.0f, 0.0f),
-    glm::vec3(6.0f, 3.0f, 0.0f),  glm::vec3(7.0f, 3.0f, 0.0f), glm::vec3(8.0f, 3.0f, 0.0f),
-    glm::vec3(12.0f, 3.0f, 0.0f), glm::vec3(13.0f, 3.0f, 0.0f), glm::vec3(14.0f, 3.0f, 0.0f),
-    glm::vec3(15.0f, 3.0f, 0.0f),
+float root_3 = pow(3, 0.5);
+float ballRadius = 0.5f;
+
+glm::vec3 cueBallPositionList[16] = {
+    glm::vec3(0.0f, ballRadius, 10.0f),                                        // Cue ball
+    glm::vec3(0.0f, ballRadius, -10.0f),                                       // 1
+    glm::vec3(-ballRadius, ballRadius, -10.0f - root_3 * ballRadius),          // 2
+    glm::vec3(ballRadius, ballRadius, -10.0f - root_3 * ballRadius),           // 3
+    glm::vec3(-2 * ballRadius, ballRadius, -10.0f - 2 * root_3 * ballRadius),  // 4
+    glm::vec3(0.0f, ballRadius, -10.0f - 2 * root_3 * ballRadius),             // 5
+    glm::vec3(2 * ballRadius, ballRadius, -10.0f - 2 * root_3 * ballRadius),   // 6
+    glm::vec3(-3 * ballRadius, ballRadius, -10.0f - 3 * root_3 * ballRadius),  // 7
+    glm::vec3(-ballRadius, ballRadius, -10.0f - 3 * root_3 * ballRadius),      // 8
+    glm::vec3(ballRadius, ballRadius, -10.0f - 3 * root_3 * ballRadius),       // 9
+    glm::vec3(3 * ballRadius, ballRadius, -10.0f - 3 * root_3 * ballRadius),   // 10
+    glm::vec3(-4 * ballRadius, ballRadius, -10.0f - 4 * root_3 * ballRadius),  // 11
+    glm::vec3(-2 * ballRadius, ballRadius, -10.0f - 4 * root_3 * ballRadius),  // 12
+    glm::vec3(0.0f, ballRadius, -10.0f - 4 * root_3 * ballRadius),             // 13
+    glm::vec3(2 * ballRadius, ballRadius, -10.0f - 4 * root_3 * ballRadius),   // 14
+    glm::vec3(4 * ballRadius, ballRadius, -10.0f - 4 * root_3 * ballRadius),   // 15
 };
 
 namespace simulation {
@@ -39,21 +50,33 @@ Physics::Physics()
       deltaTime(0.01f),
       gravity(glm::vec3(0.0f, -9.8f, 0.0f))
 {
-    tablePlanes.emplace_back(glm::vec3(0.0f, -3.0f, 0.0f),
-        glm::angleAxis(-0.1f, glm::vec3(0.0f, 0.0f, 1.0f)),
-        40.0f, 40.0f);
-    tablePlanes.emplace_back(glm::vec3(20.0f, -3.0f, 0.0f),
-        glm::angleAxis(glm::half_pi<float>() - 0.1f, glm::vec3(0.0f, 0.0f, 1.0f)),
-        40.0f, 40.0f);
-    tablePlanes.emplace_back(glm::vec3(-20.0f, -3.0f, 0.0f),
-        glm::angleAxis(-glm::half_pi<float>() + 0.1f, glm::vec3(0.0f, 0.0f, 1.0f)),
-        40.0f, 40.0f);
-    tablePlanes.emplace_back(glm::vec3(0.0f, -3.0f, 20.0f),
-        glm::angleAxis(-glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)),
-        40.0f, 40.0f);
-    tablePlanes.emplace_back(glm::vec3(0.0f, -3.0f, -20.0f),
-        glm::angleAxis(glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)),
-        40.0f, 40.0f);
+    //      y
+    //      |
+    //      |
+    //      |_______ x
+    //     /
+    //    /
+    //   z   
+    
+    // Bottom
+    tablePlanes.emplace_back(glm::vec3(0.0f, 0.0f, 0.0f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 0.0f)), 20.0f,
+                             40.0f);
+
+    // Right (+x)
+    tablePlanes.emplace_back(glm::vec3(10.0f, 0.5f, 0.0f),
+                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 39.0f);
+
+    // Left (-x)
+    tablePlanes.emplace_back(glm::vec3(-10.0f, 0.5f, 0.0f),
+                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 39.0f);
+
+    // Front (+z)
+    tablePlanes.emplace_back(glm::vec3(0.0f, 0.5f, 20.0f),
+                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 19.0f, 1.0f);
+
+    // Back (-z)
+    tablePlanes.emplace_back(glm::vec3(0.0f, 0.5f, -20.0f),
+                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 19.0f, 1.0f);
 }
 
 void Physics::computeAllForce() {
@@ -151,7 +174,7 @@ void Physics::integrate() {
 void Physics::reset() {
   for (int i = 0; i < cueBallCount; i++) {
     CueBall* cueBall = &cueBalls[i];
-    cueBall->resetCueBall(position_list[i]);
+    cueBall->resetCueBall(cueBallPositionList[i]);
   }
 }
 
