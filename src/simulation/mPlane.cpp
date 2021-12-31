@@ -1,38 +1,55 @@
 #include "simulation/mPlane.h"
+#include <glm/gtc/quaternion.hpp>
 
 namespace simulation {
 
-mPlane::mPlane() {}
+MPlane::MPlane() {}
 
-mPlane::mPlane(const glm::vec3& _position, const glm::vec3& _normal, float _width, float _height) {
+MPlane::MPlane(const glm::vec3& _position, const glm::quat& _rotation, float _width, float _height) {
   position = _position;
-  normal = _normal;
+  rotation = _rotation;
   width = _width;
   height = _height;
 }
 
 
-glm::vec3 mPlane::getPosition() const { return position; }
+glm::vec3 MPlane::getPosition() const { return position; }
 
-glm::vec3 mPlane::getNormal() const { return normal; }
+glm::quat MPlane::getRotation() const { return rotation; }
 
-float mPlane::getWidth() const { return width; }
+glm::vec3 MPlane::getNormal() const { return glm::mat3_cast(rotation)[1]; }
 
-float mPlane::getHeight() const { return height; }
+float MPlane::getWidth() const { return width; }
+
+float MPlane::getHeight() const { return height; }
 
 
-void mPlane::setPosition(const glm::vec3& _position) { position = _position; }
+void MPlane::setPosition(const glm::vec3& _position) { position = _position; }
 
-void mPlane::setNormal(const glm::vec3& _normal) { normal = _normal; }
+void MPlane::setRotation(const glm::quat& _rotation) { rotation = _rotation; }
 
-void mPlane::setWidth(float _width) { width = _width; }
+void MPlane::setWidth(float _width) { width = _width; }
 
-void mPlane::setHeight(float _height) { height = _height; }
+void MPlane::setHeight(float _height) { height = _height; }
 
-// currently ignore plane's width and height.
-glm::vec3 mPlane::projectPointOntoPlane(const glm::vec3& point) const {
-  glm::vec3 centerToPointVec = point - position;
+
+// this will ignore plane's width and height
+glm::vec3 MPlane::projectPointOntoPlane(const glm::vec3& _point) const {
+  glm::vec3 centerToPointVec = _point - position;
+  glm::vec3 normal = getNormal();
   glm::vec3 onPlanePart = centerToPointVec - glm::dot(centerToPointVec, normal) * normal;
   return onPlanePart + position;
 }
+
+// this will take plane's width and height into account
+bool MPlane::isPointOnPlane(const glm::vec3& _point) const {
+	float e = 0.00001f;
+	if (glm::length(_point - projectPointOntoPlane(_point)) >= e) return false;
+
+	glm::vec3 centerToPointVec = _point - position;
+	glm::vec3 pointLocalPos = glm::transpose(glm::mat3_cast(rotation)) * centerToPointVec;
+	return glm::abs(pointLocalPos.x) <= width / 2
+		&& glm::abs(pointLocalPos.z) <= height / 2;
+}
+
 } // namespace simulation
