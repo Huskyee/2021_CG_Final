@@ -24,6 +24,7 @@ namespace {
 graphics::camera::Camera* currentCamera = nullptr;
 // Control variables
 bool isReset = false;
+bool isShot = false;
 bool isWindowSizeChanged = false;
 bool isLightChanged = true;
 int currentLight = 0;
@@ -34,7 +35,9 @@ int alignSize = 256;
 constexpr int LIGHT_COUNT = 3;
 constexpr int CAMERA_COUNT = 1;
 constexpr int CUE_BALL_COUNT = 16;
-constexpr int MESH_COUNT = 1 + CUE_BALL_COUNT;
+constexpr int PLANE_COUNT = 5;
+constexpr int HOLE_COUNT = 6;
+constexpr int MESH_COUNT = PLANE_COUNT + HOLE_COUNT + CUE_BALL_COUNT;
 constexpr int SHADER_PROGRAM_COUNT = 3;
 }  // namespace
 
@@ -68,6 +71,7 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
     case GLFW_KEY_G: currentShader = 2; break;
     case GLFW_KEY_B: currentShader = 1; break;
     case GLFW_KEY_R: isReset = true; break;
+    case GLFW_KEY_E: isShot = true; break;
     default: break;
   }
 }
@@ -151,7 +155,7 @@ int main() {
   maxTextureSize = std::min(maxTextureSize, 4096);
   // Camera
   std::vector<graphics::camera::CameraPTR> cameras;
-  cameras.emplace_back(graphics::camera::QuaternionCamera::make_unique(glm::vec3(0, 0, 15)));
+  cameras.emplace_back(graphics::camera::QuaternionCamera::make_unique(glm::vec3(0, 3, 30)));
   assert(cameras.size() == CAMERA_COUNT);
   // TODO (Just an example for you, no need to modify here): Bind camera object's uniform buffer
   // Hint:
@@ -185,25 +189,68 @@ int main() {
   }
   // Texture
   graphics::texture::ShadowMap shadow(maxTextureSize);
-  graphics::texture::Texture2D colorOrange, cloth;
+  graphics::texture::Texture2D colorOrange, colorBlack, wood, cloth;
   graphics::texture::TextureCubeMap dice;
   colorOrange.fromColor(glm::vec4(1, 0.5, 0, 1));
+  colorBlack.fromColor(glm::vec4(0, 0, 0, 1));
   // TODO: Read texture(and set color) for objects respectively
   // Hint: check the calss of the variable(wood, colorOrange, dice) we've created for you
   //       fromFile member function
+  wood.fromFile("../assets/texture/hardwood_floor.jpg");
   cloth.fromFile("../assets/texture/cloth.jpg");
   dice.fromFile("../assets/texture/posx.jpg", "../assets/texture/negx.jpg", "../assets/texture/posy.jpg",
                 "../assets/texture/negy.jpg", "../assets/texture/posz.jpg", "../assets/texture/negz.jpg");
+
+  /* ===== Generate cue balls ===== */
+  simulation::Physics physics = simulation::Physics();
+  for (int i = 0; i < CUE_BALL_COUNT; i++) {
+    simulation::CueBall cueBall = simulation::CueBall();
+    physics.cueBalls.push_back(cueBall);
+  }
+  physics.reset();
+  /* ============================== */
+
   // Meshes
   std::vector<graphics::shape::ShapePTR> meshes;
   std::vector<graphics::texture::Texture*> diffuseTextures;
   {
     std::vector<GLfloat> vertexData;
     std::vector<GLuint> indexData;
-    graphics::shape::Plane::generateVertices(vertexData, indexData, 40, 20, 20, false);
+    glm::mat4 model;
+    for (int i = 0; i < PLANE_COUNT; i++) {
+      simulation::MPlane tableplane = physics.tablePlanes[i];
+      float planeWidth = tableplane.getWidth();
+      float planeHeight = tableplane.getHeight();
+      glm::vec3 planePosition = tableplane.getPosition();
+      glm::quat planeRotation = tableplane.getRotation();
+      
+      graphics::shape::Plane::generateVertices(vertexData, indexData, 40, planeWidth / 2, planeHeight / 2, false);
+      auto plane = graphics::shape::Plane::make_unique(vertexData, indexData);
+      model = glm::translate(glm::mat4(1), planePosition);
+      model = glm::rotate(model, glm::angle(planeRotation), glm::axis(planeRotation));
+      plane->setModelMatrix(model);
+      meshes.emplace_back(std::move(plane));
+      diffuseTextures.emplace_back(&cloth);
+
+      vertexData.clear();
+      indexData.clear();
+    }
+    std::vector<glm::vec3> holePosition = {glm::vec3(-10.0f, 0.0f, -20.0f), glm::vec3(10.0f, 0.0f, -20.0f),
+                                           glm::vec3(-10.0f, 0.0f, 0.0f),   glm::vec3(10.0f, 0.0f, 0.0f),
+                                           glm::vec3(-10.0f, 0.0f, 20.0f),  glm::vec3(10.0f, 0.0f, 20.0f)};
+
+    for (int i = 0; i < HOLE_COUNT; i++) {
+      auto sphere = graphics::shape::Sphere::make_unique();
+      model = glm::translate(glm::mat4(1), holePosition[i]);
+      model = glm::scale(model, glm::vec3(1.5f));
+      sphere->setModelMatrix(model);
+      meshes.emplace_back(std::move(sphere));
+      diffuseTextures.emplace_back(&colorBlack);
+    }
+    //graphics::shape::Plane::generateVertices(vertexData, indexData, 40, 20, 20, false);
     //auto sphere = graphics::shape::Sphere::make_unique();
     //auto cube = graphics::shape::Cube::make_unique();
-    auto ground = graphics::shape::Plane::make_unique(vertexData, indexData);
+    //auto ground = graphics::shape::Plane::make_unique(vertexData, indexData);
 
     /*glm::mat4 model = glm::translate(glm::mat4(1), glm::vec3(3, 0, 4));
     model = glm::scale(model, glm::vec3(2));
@@ -214,11 +261,11 @@ int main() {
     model = glm::scale(model, glm::vec3(2));
     cube->setModelMatrix(model);*/
 
-    glm::mat4 model = glm::translate(glm::mat4(1), glm::vec3(0, -3, 0));
-    ground->setModelMatrix(model);
+    //glm::mat4 model = glm::translate(glm::mat4(1), glm::vec3(0, -3, 0));
+    //ground->setModelMatrix(model);
 
-    meshes.emplace_back(std::move(ground));
-    diffuseTextures.emplace_back(&cloth);
+    //meshes.emplace_back(std::move(ground));
+    //diffuseTextures.emplace_back(&cloth);
     /*meshes.emplace_back(std::move(sphere));
     diffuseTextures.emplace_back(&colorOrange);
     meshes.emplace_back(std::move(cube));
@@ -242,15 +289,6 @@ int main() {
   // This will not change in rendering loop
   shadow.bind(1);
   dice.bind(2);
-
-  /* ===== Generate cue balls ===== */
-  simulation::Physics physics = simulation::Physics();
-  for (int i = 0; i < CUE_BALL_COUNT; i++) {
-    simulation::CueBall cueBall = simulation::CueBall();
-    physics.cueBalls.push_back(cueBall);
-  }
-  physics.reset();
-  /* ============================== */
 
   // Main rendering loop
   while (!glfwWindowShouldClose(window)) {
@@ -300,11 +338,19 @@ int main() {
     shadow.bindFramebuffer();
     glClear(GL_DEPTH_BUFFER_BIT);
 
+
     /* ===== Do Physics Simulation here ===== */
     physics.resolveCollision();
     physics.computeAllForce();
+    // Shot
+    if (isShot) {
+      simulation::CueBall* cueball = &physics.cueBalls[0];
+      cueball->addForce(glm::vec3(0.0f, 0.0f, -10000.0f));
+      isShot = false;
+    }
     physics.integrate();
     /* ====================================== */
+
 
     /* ===== Push cueBalls to meshes ===== */
     for (int i=0; i<CUE_BALL_COUNT; i++) {

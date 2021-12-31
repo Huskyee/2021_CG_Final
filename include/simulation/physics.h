@@ -1,5 +1,8 @@
 #pragma once
 #include <vector>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/constants.hpp>
+#include <math.h>
 #include "cueBall.h"
 #include "mPlane.h"
 

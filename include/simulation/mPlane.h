@@ -7,10 +7,10 @@ namespace simulation {
 
 class MPlane {
  private:
-  glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-  glm::quat rotation = glm::angleAxis(0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-  float width = 5.0f;
-  float height = 5.0f;
+  glm::vec3 position;
+  glm::quat rotation;
+  float width;
+  float height;
 
  public:
   MPlane();
