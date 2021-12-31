@@ -186,6 +186,7 @@ int main() {
   // Texture
   graphics::texture::ShadowMap shadow(maxTextureSize);
   graphics::texture::Texture2D colorOrange, cloth;
+  graphics::texture::Texture2D cueBallTextures[CUE_BALL_COUNT];
   graphics::texture::TextureCubeMap dice;
   colorOrange.fromColor(glm::vec4(1, 0.5, 0, 1));
   // TODO: Read texture(and set color) for objects respectively
@@ -194,6 +195,10 @@ int main() {
   cloth.fromFile("../assets/texture/cloth.jpg");
   dice.fromFile("../assets/texture/posx.jpg", "../assets/texture/negx.jpg", "../assets/texture/posy.jpg",
                 "../assets/texture/negy.jpg", "../assets/texture/posz.jpg", "../assets/texture/negz.jpg");
+  for (int i =0; i<CUE_BALL_COUNT; i++) {
+    cueBallTextures[i].fromFile("../assets/texture/" + std::to_string(i) + ".jpeg");
+  }
+
   // Meshes
   std::vector<graphics::shape::ShapePTR> meshes;
   std::vector<graphics::texture::Texture*> diffuseTextures;
@@ -321,7 +326,7 @@ int main() {
 
       cueBall->setModelMatrix(model);
       meshes.emplace_back(std::move(cueBall));
-      diffuseTextures.emplace_back(&colorOrange);
+      diffuseTextures.emplace_back(&cueBallTextures[i]);
     }
     /* ============================== */
 
