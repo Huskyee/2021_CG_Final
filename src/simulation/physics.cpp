@@ -50,33 +50,73 @@ Physics::Physics()
       deltaTime(0.01f),
       gravity(glm::vec3(0.0f, -9.8f, 0.0f))
 {
-    //      y
-    //      |
-    //      |
-    //      |_______ x
-    //     /
-    //    /
-    //   z   
+    //      y                _____6_____
+    //      |               |           |
+    //      |               3           1
+    //      |_______ x      |           |
+    //     /                |           |
+    //    /                 4           2
+    //   z                  |_____5_____|
     
+
     // Bottom
-    tablePlanes.emplace_back(glm::vec3(0.0f, 0.0f, 0.0f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 0.0f)), 20.0f,
+    tablePlanes.emplace_back(glm::vec3(0.0f, 0.0f, 0.0f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 20.0f,
                              40.0f);
 
-    // Right (+x)
-    tablePlanes.emplace_back(glm::vec3(10.0f, 0.5f, 0.0f),
-                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 39.0f);
-
-    // Left (-x)
-    tablePlanes.emplace_back(glm::vec3(-10.0f, 0.5f, 0.0f),
-                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 39.0f);
-
-    // Front (+z)
+    // 1
+    tablePlanes.emplace_back(glm::vec3(10.0f, 0.5f, -9.875f),
+                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 18.25f);
+    // 2
+    tablePlanes.emplace_back(glm::vec3(10.0f, 0.5f, 9.875f),
+                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 18.25f);
+    // 3
+    tablePlanes.emplace_back(glm::vec3(-10.0f, 0.5f, -9.875f),
+                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 18.25f);
+    // 4
+    tablePlanes.emplace_back(glm::vec3(-10.0f, 0.5f, 9.875f),
+                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 18.25f);
+    // 5
     tablePlanes.emplace_back(glm::vec3(0.0f, 0.5f, 20.0f),
-                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 19.0f, 1.0f);
-
-    // Back (-z)
+                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 18.0f, 1.0f);
+    // 6
     tablePlanes.emplace_back(glm::vec3(0.0f, 0.5f, -20.0f),
-                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 19.0f, 1.0f);
+                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 18.0f, 1.0f);
+
+    // Green (decoration)
+    tablePlanes.emplace_back(glm::vec3(10.5f, 1.0f, -9.875f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             18.25f);
+    tablePlanes.emplace_back(glm::vec3(10.5f, 1.0f, 9.875f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             18.25f);
+    tablePlanes.emplace_back(glm::vec3(-10.5f, 1.0f, -9.875f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             18.25f);
+    tablePlanes.emplace_back(glm::vec3(-10.5f, 1.0f, 9.875f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             18.25f);
+    tablePlanes.emplace_back(glm::vec3(0.0f, 1.0f, 20.5f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 18.0f,
+                             1.0f);
+    tablePlanes.emplace_back(glm::vec3(0.0f, 1.0f, -20.5f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 18.0f,
+                             1.0f);
+
+    // Wood (decoration)
+    tablePlanes.emplace_back(glm::vec3(11.5f, 1.0f, 0.0f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             42.0f);
+    tablePlanes.emplace_back(glm::vec3(-11.5f, 1.0f, 0.0f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             42.0f);
+    tablePlanes.emplace_back(glm::vec3(0.0f, 1.0f, 21.5f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 24.0f,
+                             1.0f);
+    tablePlanes.emplace_back(glm::vec3(0.0f, 1.0f, -21.5f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 24.0f,
+                             1.0f);
+    tablePlanes.emplace_back(glm::vec3(12.0f, 0.5f, 0.0f),
+                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             44.0f);
+    tablePlanes.emplace_back(glm::vec3(-12.0f, 0.5f, 0.0f),
+                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             44.0f);
+    tablePlanes.emplace_back(glm::vec3(0.0f, 0.5f, 22.0),
+                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 24.0f,
+                             1.0f);
+    tablePlanes.emplace_back(glm::vec3(0.0f, 0.5f, -22.0),
+                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 24.0f,
+                             1.0f);
 }
 
 void Physics::computeAllForce() {
@@ -94,8 +134,8 @@ void Physics::computeAllForce() {
            computeCueBallPairForce(cueBalls[i], cueBalls[j], d, c);
       }
   }
-  // ball and table
-  for (int i = 0; i < tablePlanes.size(); i++) {
+  // ball and table (consider only 7 planes)
+  for (int i = 0; i < 7; i++) {
       for (int j = 0; j < cueBallCount; j++) {
           computeCueBallTableForce(cueBalls[j], tablePlanes[i], d, k);
       }
@@ -158,6 +198,8 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane, fl
     constexpr float coefFriction = 0.03f;
 
     float cueBallRaduis = cueBall.getRadius();
+    float planeWidth = plane.getWidth();
+    float planeHeight = plane.getHeight();
     glm::vec3 planeNormal = glm::normalize(plane.getNormal());
     glm::vec3 planePosition = plane.getPosition();
     glm::vec3 cueBallForce = cueBall.getForce();
@@ -171,9 +213,11 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane, fl
 
     bool closeToThePlane = glm::dot(planeNormal, cueBallContactPoint - planePosition) < eEPSILON;
     bool headingIn = glm::dot(planeNormal, cueBallVelocity) < 0;
+    float planeLength = abs(planeNormal.x) == 1.0f ? planeHeight : planeWidth;
+    bool isEdge = glm::length(cueBallContactPoint - cueBallRaduis - planePosition) > (planeLength / 2);
     // Before: v = vn + vt
     // After: v = -kr * vn + vt
-    if (closeToThePlane && headingIn) {
+    if (closeToThePlane && headingIn && !isEdge) {
       cueBall.setVelocity(-coefResist * vn + vt);
     }
 
@@ -245,8 +289,8 @@ void Physics::resolveCollision() {
                 resolveCollision(cueBalls[i], cueBalls[j], d);
             }
         }
-        // ball and table
-        for (int i = 0; i < tablePlanes.size(); i++) {
+        // ball and table (only consider 7 planes)
+        for (int i = 0; i < 7; i++) {
             for (int j = 0; j < cueBallCount; j++) {
                 resolveCollision(cueBalls[j], tablePlanes[i], d);
             }

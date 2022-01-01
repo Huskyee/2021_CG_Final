@@ -35,8 +35,8 @@ int alignSize = 256;
 constexpr int LIGHT_COUNT = 3;
 constexpr int CAMERA_COUNT = 1;
 constexpr int CUE_BALL_COUNT = 16;
-constexpr int PLANE_COUNT = 5;
-constexpr int HOLE_COUNT = 6;
+constexpr int PLANE_COUNT = 21;
+constexpr int HOLE_COUNT = 0;
 constexpr int MESH_COUNT = PLANE_COUNT + HOLE_COUNT + CUE_BALL_COUNT;
 constexpr int SHADER_PROGRAM_COUNT = 3;
 }  // namespace
@@ -224,26 +224,31 @@ int main() {
     std::vector<GLuint> indexData;
     glm::mat4 model;
     for (int i = 0; i < PLANE_COUNT; i++) {
+      float isWood = (i > 12) ? true : false;
       simulation::MPlane tableplane = physics.tablePlanes[i];
       float planeWidth = tableplane.getWidth();
       float planeHeight = tableplane.getHeight();
       glm::vec3 planePosition = tableplane.getPosition();
       glm::quat planeRotation = tableplane.getRotation();
       
-      graphics::shape::Plane::generateVertices(vertexData, indexData, 40, planeWidth / 2, planeHeight / 2, false);
+      graphics::shape::Plane::generateVertices(vertexData, indexData, 40, planeWidth / 2, planeHeight / 2, isWood);
       auto plane = graphics::shape::Plane::make_unique(vertexData, indexData);
       model = glm::translate(glm::mat4(1), planePosition);
       model = glm::rotate(model, glm::angle(planeRotation), glm::axis(planeRotation));
       plane->setModelMatrix(model);
       meshes.emplace_back(std::move(plane));
-      diffuseTextures.emplace_back(&cloth);
+      if (isWood) {
+        diffuseTextures.emplace_back(&wood);
+      } else {
+        diffuseTextures.emplace_back(&cloth);
+      }
 
       vertexData.clear();
       indexData.clear();
     }
 
     // Holes
-    std::vector<glm::vec3> holePosition = {glm::vec3(-10.0f, 0.0f, -20.0f), glm::vec3(10.0f, 0.0f, -20.0f),
+    /*std::vector<glm::vec3> holePosition = {glm::vec3(-10.0f, 0.0f, -20.0f), glm::vec3(10.0f, 0.0f, -20.0f),
                                            glm::vec3(-10.0f, 0.0f, 0.0f),   glm::vec3(10.0f, 0.0f, 0.0f),
                                            glm::vec3(-10.0f, 0.0f, 20.0f),  glm::vec3(10.0f, 0.0f, 20.0f)};
 
@@ -254,7 +259,7 @@ int main() {
       sphere->setModelMatrix(model);
       meshes.emplace_back(std::move(sphere));
       diffuseTextures.emplace_back(&colorBlack);
-    }
+    }*/
     //graphics::shape::Plane::generateVertices(vertexData, indexData, 40, 20, 20, false);
     //auto sphere = graphics::shape::Sphere::make_unique();
     //auto cube = graphics::shape::Cube::make_unique();
