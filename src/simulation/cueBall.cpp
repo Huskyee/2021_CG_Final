@@ -16,6 +16,7 @@ glm::vec3 CueBall::getPosition() const { return position; }
 glm::vec3 CueBall::getVelocity() const { return velocity; }
 glm::vec3 CueBall::getAcceleration() const { return force / mass; }
 glm::vec3 CueBall::getForce() const { return force; }
+glm::quat CueBall::getRotation() const { return rotation; }
 
 //==========================================
 //  setter
@@ -32,6 +33,8 @@ void CueBall::setAcceleration(const glm::vec3 &_acceleration) { force = _acceler
 
 void CueBall::setForce(const glm::vec3 &_force) { force = _force; }
 
+void CueBall::setRotation(const glm::quat &_rotation) { rotation = _rotation; }
+
 void CueBall::setForceField(const glm::vec3 &_forceField) { this->setAcceleration(_forceField); }
 
 //==========================================
@@ -46,9 +49,12 @@ void CueBall::addAcceleration(const glm::vec3 &_acceleration) { force += _accele
 
 void CueBall::addForce(const glm::vec3 &_force) { force += _force; }
 
+void CueBall::addRotation(const glm::quat &_rotation) { rotation = _rotation * rotation; }
+
 void CueBall::resetCueBall(const glm::vec3 &_position) {
   this->setPosition(_position);
   this->setForce(glm::vec3(0.0f, 0.0f, 0.0f));
   this->setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+  this->setRotation(glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
 }
 }  // namespace simulation

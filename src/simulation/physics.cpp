@@ -205,12 +205,24 @@ void Physics::integrate() {
     glm::vec3 acceleration = cueBall->getAcceleration();
     cueBall->addVelocity(acceleration * deltaTime);
 
-    float d = 0.001f;
-    if (glm::length(cueBall->getVelocity()) < d)
-        cueBall->setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
-
     glm::vec3 velocity = cueBall->getVelocity();
-    cueBall->addPosition(velocity * deltaTime);
+
+    float d = 0.01f;
+    if (glm::length(velocity) < d) {
+      cueBall->setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+    } else {
+      cueBall->addPosition(velocity * deltaTime);
+
+      // Calculate rotation by the direction of velocity
+      float travelDistance = glm::length(velocity * deltaTime);
+      float radius = cueBall->getRadius();
+      float circumference = 2 * glm::pi<float>() * radius;
+      float angle = 2 * glm::pi<float>() * travelDistance / circumference;
+      glm::vec3 normal = glm::vec3(0.0f, 1.0f, 0.0f);
+      glm::vec3 axis = glm::normalize(glm::cross(normal, velocity));
+      glm::quat rotation = glm::angleAxis(angle, axis);
+      cueBall->addRotation(rotation);
+    }
   }
 }
 

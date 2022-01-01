@@ -219,6 +219,7 @@ int main() {
   std::vector<graphics::shape::ShapePTR> meshes;
   std::vector<graphics::texture::Texture*> diffuseTextures;
   {
+    // Planes
     std::vector<GLfloat> vertexData;
     std::vector<GLuint> indexData;
     glm::mat4 model;
@@ -240,6 +241,8 @@ int main() {
       vertexData.clear();
       indexData.clear();
     }
+
+    // Holes
     std::vector<glm::vec3> holePosition = {glm::vec3(-10.0f, 0.0f, -20.0f), glm::vec3(10.0f, 0.0f, -20.0f),
                                            glm::vec3(-10.0f, 0.0f, 0.0f),   glm::vec3(10.0f, 0.0f, 0.0f),
                                            glm::vec3(-10.0f, 0.0f, 20.0f),  glm::vec3(10.0f, 0.0f, 20.0f)};
@@ -368,7 +371,11 @@ int main() {
       model = glm::scale(model, glm::vec3(cueBallRadius));
 
       // Maybe set rotation here
-      model = glm::rotate(model, glm::half_pi<float>(), glm::vec3(1, 0, 0));
+      glm::quat rotation = physics.cueBalls[i].getRotation();
+      float angle = glm::angle(rotation);
+      glm::vec3 axis = glm::axis(rotation);
+      model = glm::rotate(model, angle, axis);
+      //model = glm::rotate(model, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 
       cueBall->setModelMatrix(model);
       meshes.emplace_back(std::move(cueBall));
