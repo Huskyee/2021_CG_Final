@@ -137,8 +137,9 @@ void Physics::computeCueBallPairForce(CueBall& cueBallA, CueBall& cueBallB, floa
 }
 
 void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane, float d, float k) {
-    glm::vec3 planeNormal = plane.getNormal();
+    /* glm::vec3 planeNormal = plane.getNormal();
     // use center of ball to obtain contact point and detect collision, not accurate
+    // Fixed: use the closest point near the plane
     glm::vec3 contact = plane.projectPointOntoPlane(cueBall.getPosition());
     if (!plane.isPointOnPlane(contact)) return;
     glm::vec3 centerToContactVec = contact - cueBall.getPosition();
@@ -150,7 +151,49 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane, fl
         if (toPlaneSpeed > 0.0f) {
             cueBall.addForce(k * cueBall.getMass() * toPlaneSpeed * planeNormal / deltaTime);
         }
+    }*/
+
+    constexpr float eEPSILON = 0.01f;
+    constexpr float coefResist = 0.8f;
+    constexpr float coefFriction = 0.03f;
+
+    float cueBallRaduis = cueBall.getRadius();
+    glm::vec3 planeNormal = glm::normalize(plane.getNormal());
+    glm::vec3 planePosition = plane.getPosition();
+    glm::vec3 cueBallForce = cueBall.getForce();
+    glm::vec3 cueBallVelocity = cueBall.getVelocity();
+    glm::vec3 cueBallContactPoint = cueBall.getPosition() - cueBallRaduis * planeNormal;
+    // Decompose cue ball velocity vector into vn, vt
+    // vn: parallel to plane normal
+    // vt: perpendicular to plane normal
+    glm::vec3 vn = float(glm::dot(cueBallVelocity, -planeNormal) / pow(glm::length(-planeNormal), 2)) * (-planeNormal);
+    glm::vec3 vt = cueBallVelocity - vn;
+
+    bool closeToThePlane = glm::dot(planeNormal, cueBallContactPoint - planePosition) < eEPSILON;
+    bool headingIn = glm::dot(planeNormal, cueBallVelocity) < 0;
+    // Before: v = vn + vt
+    // After: v = -kr * vn + vt
+    if (closeToThePlane && headingIn) {
+      cueBall.setVelocity(-coefResist * vn + vt);
     }
+
+    // Contact force = -(N dot f) * N
+    // Friction = -kf(-N dot f) * vt 
+    bool onThePlane = abs(glm::dot(planeNormal, cueBallContactPoint - planePosition)) < eEPSILON;
+    bool hasContactForce = glm::dot(planeNormal, cueBallForce) < 0;
+    bool movingAlongThePlane = abs(glm::dot(planeNormal, cueBallVelocity)) < eEPSILON;
+    if (onThePlane) {
+      if (hasContactForce) {
+        glm::vec3 contactForce = -glm::dot(planeNormal, cueBallForce) * planeNormal;
+        cueBall.addForce(contactForce);
+      }
+      if (movingAlongThePlane) {
+        glm::vec3 friction = coefFriction * glm::dot(planeNormal, cueBallForce) * vt;
+        cueBall.addForce(friction);
+      }
+    }
+
+
 }
 
 void Physics::integrate() {
