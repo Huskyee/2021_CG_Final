@@ -36,7 +36,7 @@ constexpr int LIGHT_COUNT = 3;
 constexpr int CAMERA_COUNT = 1;
 constexpr int CUE_BALL_COUNT = 16;
 constexpr int PLANE_COUNT = 21;
-constexpr int HOLE_COUNT = 0;
+constexpr int HOLE_COUNT = 6;
 constexpr int MESH_COUNT = PLANE_COUNT + HOLE_COUNT + CUE_BALL_COUNT;
 constexpr int SHADER_PROGRAM_COUNT = 3;
 }  // namespace
@@ -248,18 +248,18 @@ int main() {
     }
 
     // Holes
-    /*std::vector<glm::vec3> holePosition = {glm::vec3(-10.0f, 0.0f, -20.0f), glm::vec3(10.0f, 0.0f, -20.0f),
-                                           glm::vec3(-10.0f, 0.0f, 0.0f),   glm::vec3(10.0f, 0.0f, 0.0f),
-                                           glm::vec3(-10.0f, 0.0f, 20.0f),  glm::vec3(10.0f, 0.0f, 20.0f)};
+    std::vector<glm::vec3> holePosition = {glm::vec3(-10.0f, -0.25f, -20.0f), glm::vec3(10.0f, -0.25f, -20.0f),
+                                           glm::vec3(-10.25f, -0.5f, 0.0f),   glm::vec3(10.25f, -0.5f, 0.0f),
+                                           glm::vec3(-10.0f, -0.25f, 20.0f),   glm::vec3(10.0f, -0.25f, 20.0f)};
 
     for (int i = 0; i < HOLE_COUNT; i++) {
       auto sphere = graphics::shape::Sphere::make_unique();
       model = glm::translate(glm::mat4(1), holePosition[i]);
-      model = glm::scale(model, glm::vec3(1.5f));
+      model = glm::scale(model, glm::vec3(1.0f));
       sphere->setModelMatrix(model);
       meshes.emplace_back(std::move(sphere));
       diffuseTextures.emplace_back(&colorBlack);
-    }*/
+    }
     //graphics::shape::Plane::generateVertices(vertexData, indexData, 40, 20, 20, false);
     //auto sphere = graphics::shape::Sphere::make_unique();
     //auto cube = graphics::shape::Cube::make_unique();
