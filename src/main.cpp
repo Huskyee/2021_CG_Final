@@ -248,9 +248,9 @@ int main() {
     }
 
     // Holes
-    std::vector<glm::vec3> holePosition = {glm::vec3(-10.0f, -0.25f, -20.0f), glm::vec3(10.0f, -0.25f, -20.0f),
-                                           glm::vec3(-10.25f, -0.5f, 0.0f),   glm::vec3(10.25f, -0.5f, 0.0f),
-                                           glm::vec3(-10.0f, -0.25f, 20.0f),   glm::vec3(10.0f, -0.25f, 20.0f)};
+    std::vector<glm::vec3> holePosition = {glm::vec3(-10.0f, -0.05f, -20.0f), glm::vec3(10.0f, -0.05f, -20.0f),
+                                           glm::vec3(-10.45f, -0.5f, 0.0f),   glm::vec3(10.45f, -0.5f, 0.0f),
+                                           glm::vec3(-10.0f, -0.05f, 20.0f),   glm::vec3(10.0f, -0.05f, 20.0f)};
 
     for (int i = 0; i < HOLE_COUNT; i++) {
       auto sphere = graphics::shape::Sphere::make_unique();
