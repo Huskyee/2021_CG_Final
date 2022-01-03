@@ -60,7 +60,7 @@ void CueBall::setTorque(const glm::vec3 &_torque) { torque = _torque; }
 //==========================================
 
 void CueBall::addPosition(const glm::vec3 &_position) { position += _position; }
-void CueBall::addRotation(const glm::quat &_rotation) { rotation *= _rotation; }
+void CueBall::addRotation(const glm::quat &_rotation) { rotation = _rotation * rotation; }
 void CueBall::addLinearMomentum(const glm::vec3 &_linearMomentum) { linearMomentum += _linearMomentum; }
 void CueBall::addAngularMomentum(const glm::vec3 &_angularMomentum) { angularMomentum += _angularMomentum; }
 

@@ -349,8 +349,12 @@ int main() {
     physics.computeAllForce();
     // Shot
     if (isShot) {
-      simulation::CueBall* cueball = &physics.cueBalls[0];
-      cueball->addForce(glm::vec3(0.0f, 0.0f, -10000.0f));
+      simulation::CueBall* cueBall = &physics.cueBalls[0];
+//      cueBall->addForce(glm::vec3(0.0f, 0.0f, -10000.0f));
+      glm::vec3 shotDirection = cueBall->getPosition() - glm::vec3(currentCamera->getPosition());
+      shotDirection.y = 0;
+      shotDirection = glm::normalize(shotDirection);
+      cueBall->addForce(shotDirection * 10000.f);
       isShot = false;
     }
     physics.integrate();
