@@ -1,6 +1,5 @@
 #include "simulation/physics.h"
 #include "simulation/mPlane.h"
-#include <iostream>
 
 
 //glm::vec3 position_list[16] = {
