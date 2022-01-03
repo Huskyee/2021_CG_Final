@@ -1,3 +1,2 @@
-﻿  physics.cpp
-D:\研究所\計算機圖學\Final Project\2021_CG_Final\src\simulation\physics.cpp(24,14): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+﻿  main.cpp
   HW2.vcxproj -> D:\研究所\計算機圖學\Final Project\2021_CG_Final\bin\HW2.exe

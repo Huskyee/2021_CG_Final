@@ -24,7 +24,7 @@
 float root_3 = pow(3, 0.5);
 float ballRadius = 0.5f;
 glm::vec3 holePositionList[6] = {glm::vec3(-10.0f, 0.0f, -20.0f), glm::vec3(10.0f, 0.0f, -20.0f),
-                                 glm::vec3(-10.45f, 0.0f, 0.0f), glm::vec3(10.45f, 0.0f, 0.0f),
+                                 glm::vec3(-10.45f, -0.25f, 0.0f), glm::vec3(10.45f, -0.25f, 0.0f),
                                  glm::vec3(-10.0f, 0.0f, 20.0f), glm::vec3(10.0f, 0.0f, 20.0f)};
 
 glm::vec3 cueBallPositionList[16] = {
