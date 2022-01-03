@@ -26,5 +26,6 @@ class Physics {
   void resolveCollision();
   void resolveCollision(CueBall &cueBallA, CueBall &cueBallB, float d = 0.001f);
   void resolveCollision(CueBall &cueBall, const MPlane &plane, float d = 0.001f);
+  void holeDetection(CueBall *cueBall);
 };
 } // namespace simulation

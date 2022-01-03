@@ -23,6 +23,9 @@
 
 float root_3 = pow(3, 0.5);
 float ballRadius = 0.5f;
+glm::vec3 holePositionList[6] = {glm::vec3(-10.0f, 0.0f, -20.0f), glm::vec3(10.0f, 0.0f, -20.0f),
+                                 glm::vec3(-10.45f, 0.0f, 0.0f), glm::vec3(10.45f, 0.0f, 0.0f),
+                                 glm::vec3(-10.0f, 0.0f, 20.0f), glm::vec3(10.0f, 0.0f, 20.0f)};
 
 glm::vec3 cueBallPositionList[16] = {
     glm::vec3(0.0f, ballRadius, 10.0f),                                        // Cue ball
@@ -121,24 +124,32 @@ Physics::Physics()
 
 void Physics::computeAllForce() {
   for (int i = 0; i < cueBallCount; i++) {
-    computeCueBallForce(cueBalls[i]);
+    if (cueBalls[i].getExist()) {
+      computeCueBallForce(cueBalls[i]);
+    }
   }
 
   float d = 0.002f;
   float k = 1.9f;
-  //float c = 0.7f;
+  // float c = 0.7f;
   float c = 0.9f;
+
   // ball and ball
   for (int i = 0; i < cueBallCount; i++) {
-      for (int j = i + 1; j < cueBallCount; j++) {
-           computeCueBallPairForce(cueBalls[i], cueBalls[j], d, c);
+    for (int j = i + 1; j < cueBallCount; j++) {
+      if (cueBalls[i].getExist()) {
+        computeCueBallPairForce(cueBalls[i], cueBalls[j], d, c);
       }
+    }
   }
+
   // ball and table (consider only 7 planes)
   for (int i = 0; i < 7; i++) {
-      for (int j = 0; j < cueBallCount; j++) {
-          computeCueBallTableForce(cueBalls[j], tablePlanes[i], d, k);
+    for (int j = 0; j < cueBallCount; j++) {
+      if (cueBalls[j].getExist()) {
+        computeCueBallTableForce(cueBalls[j], tablePlanes[i], d, k);
       }
+    }
   }
 }
 
@@ -243,36 +254,43 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane, fl
 void Physics::integrate() {
   for (int i = 0; i < cueBallCount; i++) {
     CueBall* cueBall = &cueBalls[i];
-    glm::vec3 force = cueBall->getForce();
-    float mass = cueBall->getMass();
-    cueBall->setAcceleration(force / mass);
-    glm::vec3 acceleration = cueBall->getAcceleration();
-    cueBall->addVelocity(acceleration * deltaTime);
+    if (cueBall->getExist()) {
+      glm::vec3 force = cueBall->getForce();
+      float mass = cueBall->getMass();
+      cueBall->setAcceleration(force / mass);
+      glm::vec3 acceleration = cueBall->getAcceleration();
+      cueBall->addVelocity(acceleration * deltaTime);
 
-    glm::vec3 velocity = cueBall->getVelocity();
+      glm::vec3 velocity = cueBall->getVelocity();
 
-    float d = 0.01f;
-    if (glm::length(velocity) < d) {
-      cueBall->setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
-    } else {
-      cueBall->addPosition(velocity * deltaTime);
+      float d = 0.01f;
+      if (glm::length(velocity) < d) {
+        cueBall->setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+      } else {
+        cueBall->addPosition(velocity * deltaTime);
 
-      // Calculate rotation by the direction of velocity
-      float travelDistance = glm::length(velocity * deltaTime);
-      float radius = cueBall->getRadius();
-      float circumference = 2 * glm::pi<float>() * radius;
-      float angle = 2 * glm::pi<float>() * travelDistance / circumference;
-      glm::vec3 normal = glm::vec3(0.0f, 1.0f, 0.0f);
-      glm::vec3 axis = glm::normalize(glm::cross(normal, velocity));
-      glm::quat rotation = glm::angleAxis(angle, axis);
-      cueBall->addRotation(rotation);
+        // Calculate rotation by the direction of velocity
+        float travelDistance = glm::length(velocity * deltaTime);
+        float radius = cueBall->getRadius();
+        float circumference = 2 * glm::pi<float>() * radius;
+        float angle = 2 * glm::pi<float>() * travelDistance / circumference;
+        glm::vec3 normal = glm::vec3(0.0f, 1.0f, 0.0f);
+        glm::vec3 axis = glm::normalize(glm::cross(normal, velocity));
+        glm::quat rotation = glm::angleAxis(angle, axis);
+        cueBall->addRotation(rotation);
+      }
+
+      // Hole detection
+      holeDetection(cueBall);
     }
   }
 }
 
 void Physics::reset() {
+  std::cout << "\nReset\n";
   for (int i = 0; i < cueBallCount; i++) {
     CueBall* cueBall = &cueBalls[i];
+    cueBall->setExist(true);
     cueBall->resetCueBall(cueBallPositionList[i]);
   }
 }
@@ -330,6 +348,20 @@ void Physics::resolveCollision(CueBall& cueBall, const MPlane& plane, float d) {
             ? centerToContactLength + minDistance : minDistance - centerToContactLength;
         cueBall.addPosition(planeNormal * moveDistance);
     }
+}
+
+void Physics::holeDetection(CueBall* cueBall) {
+  for (int i = 0; i < 6; i++) {
+    float eEPSILON = 0.4f;
+    float cueBallRadius = cueBall->getRadius();
+    glm::vec3 cueBallPosition = cueBall->getPosition();
+    glm::vec3 holePosition = holePositionList[i];
+    float distance = glm::length(cueBallPosition - holePosition) - cueBallRadius;
+    if (distance < eEPSILON) {
+      std::cout << "in hole\n";
+      cueBall->setExist(false);
+    }
+  }
 }
 
 } // namespace simulation

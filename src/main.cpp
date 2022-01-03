@@ -190,10 +190,11 @@ int main() {
   // Texture
   graphics::texture::ShadowMap shadow(maxTextureSize);
   graphics::texture::Texture2D cueBallTextures[CUE_BALL_COUNT];
-  graphics::texture::Texture2D colorOrange, colorBlack, wood, cloth;
+  graphics::texture::Texture2D colorOrange, colorBlack, transparent, wood, cloth;
   graphics::texture::TextureCubeMap dice;
   colorOrange.fromColor(glm::vec4(1, 0.5, 0, 1));
   colorBlack.fromColor(glm::vec4(0, 0, 0, 1));
+  transparent.fromColor(glm::vec4(0, 0, 0, 0));
   // TODO: Read texture(and set color) for objects respectively
   // Hint: check the calss of the variable(wood, colorOrange, dice) we've created for you
   //       fromFile member function
@@ -202,7 +203,7 @@ int main() {
   dice.fromFile("../assets/texture/posx.jpg", "../assets/texture/negx.jpg", "../assets/texture/posy.jpg",
                 "../assets/texture/negy.jpg", "../assets/texture/posz.jpg", "../assets/texture/negz.jpg");
   
-  for (int i =0; i<CUE_BALL_COUNT; i++) {
+  for (int i = 0; i < CUE_BALL_COUNT; i++) {
     cueBallTextures[i].fromFile("../assets/texture/" + std::to_string(i) + ".jpeg");
   }
 
@@ -384,7 +385,11 @@ int main() {
 
       cueBall->setModelMatrix(model);
       meshes.emplace_back(std::move(cueBall));
-      diffuseTextures.emplace_back(&cueBallTextures[i]);
+      if (physics.cueBalls[i].getExist()) {
+        diffuseTextures.emplace_back(&cueBallTextures[i]);
+      } else {
+        diffuseTextures.emplace_back(&transparent);
+      }
     }
     /* ============================== */
 

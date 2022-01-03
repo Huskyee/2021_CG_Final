@@ -7,6 +7,7 @@ class CueBall {
  private:
   float mass = 5.0f;
   float radius = 0.5f;
+  bool isExist = true;
   glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
   glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
   glm::vec3 force = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -23,6 +24,7 @@ class CueBall {
 
   float getMass() const;
   float getRadius() const;
+  bool getExist() const;
   glm::vec3 getPosition() const;
   glm::vec3 getVelocity() const;
   glm::vec3 getAcceleration() const;
@@ -35,6 +37,7 @@ class CueBall {
 
   void setMass(const float _mass);
   void setRadius(const float _radius);
+  void setExist(const bool _isExist);
   void setPosition(const glm::vec3 &_position);
   void setVelocity(const glm::vec3 &_velocity);
   void setAcceleration(const glm::vec3 &_acceleration);
