@@ -86,7 +86,6 @@ void Physics::computeAllForce() {
 
   float d = 0.002f;
   float k = 1.9f;
-  //float c = 0.7f;
   float c = 0.9f;
   // ball and ball
   for (int i = 0; i < cueBallCount; i++) {
@@ -104,6 +103,7 @@ void Physics::computeAllForce() {
 
 void Physics::computeCueBallForce(CueBall& cueBall) {
     cueBall.setForceField(gravity);
+    cueBall.setTorque(glm::zero<glm::vec3>());
 }
 
 void Physics::computeCueBallPairForce(CueBall& cueBallA, CueBall& cueBallB, float d, float c) {
@@ -137,37 +137,131 @@ void Physics::computeCueBallPairForce(CueBall& cueBallA, CueBall& cueBallB, floa
 }
 
 void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane, float d, float k) {
-    glm::vec3 planeNormal = plane.getNormal();
-    // use center of ball to obtain contact point and detect collision, not accurate
-    glm::vec3 contact = plane.projectPointOntoPlane(cueBall.getPosition());
-    if (!plane.isPointOnPlane(contact)) return;
-    glm::vec3 centerToContactVec = contact - cueBall.getPosition();
-    float centerToContactLength = glm::length(centerToContactVec);
-    float minDistance = cueBall.getRadius() + d;
-    bool isBallStuckInPlane = glm::dot(-centerToContactVec, planeNormal) < 0.0f;
-    if (isBallStuckInPlane || centerToContactLength < minDistance) {
-        float toPlaneSpeed = glm::dot(-planeNormal, cueBall.getVelocity());
-        if (toPlaneSpeed > 0.0f) {
-            cueBall.addForce(k * cueBall.getMass() * toPlaneSpeed * planeNormal / deltaTime);
-        }
+  /* glm::vec3 planeNormal = plane.getNormal();
+  // use center of ball to obtain contact point and detect collision, not accurate
+  // Fixed: use the closest point near the plane
+  glm::vec3 contact = plane.projectPointOntoPlane(cueBall.getPosition());
+  if (!plane.isPointOnPlane(contact)) return;
+  glm::vec3 centerToContactVec = contact - cueBall.getPosition();
+  float centerToContactLength = glm::length(centerToContactVec);
+  float minDistance = cueBall.getRadius() + d;
+  bool isBallStuckInPlane = glm::dot(-centerToContactVec, planeNormal) < 0.0f;
+  if (isBallStuckInPlane || centerToContactLength < minDistance) {
+      float toPlaneSpeed = glm::dot(-planeNormal, cueBall.getVelocity());
+      if (toPlaneSpeed > 0.0f) {
+          cueBall.addForce(k * cueBall.getMass() * toPlaneSpeed * planeNormal / deltaTime);
+      }
+  }*/
+
+  //constexpr float eEPSILON = 0.01f;
+  //constexpr float coefResist = 0.8f;
+  //constexpr float coefFriction = 0.03f;
+
+  //float cueBallRaduis = cueBall.getRadius();
+  //glm::vec3 planeNormal = glm::normalize(plane.getNormal());
+  //glm::vec3 planePosition = plane.getPosition();
+  //glm::vec3 cueBallForce = cueBall.getForce();
+  //glm::vec3 cueBallVelocity = cueBall.getVelocity();
+  //glm::vec3 cueBallContactPoint = cueBall.getPosition() - cueBallRaduis * planeNormal;
+  //// Decompose cue ball velocity vector into vn, vt
+  //// vn: parallel to plane normal
+  //// vt: perpendicular to plane normal
+  //glm::vec3 vn = float(glm::dot(cueBallVelocity, -planeNormal) / pow(glm::length(-planeNormal), 2)) * (-planeNormal);
+  //glm::vec3 vt = cueBallVelocity - vn;
+
+  //bool closeToThePlane = glm::dot(planeNormal, cueBallContactPoint - planePosition) < eEPSILON;
+  //bool headingIn = glm::dot(planeNormal, cueBallVelocity) < 0;
+  //// Before: v = vn + vt
+  //// After: v = -kr * vn + vt
+  //if (closeToThePlane && headingIn) {
+  //  cueBall.setVelocity(-coefResist * vn + vt);
+  //}
+
+  //// Contact force = -(N dot f) * N
+  //// Friction = -kf(-N dot f) * vt
+  //bool onThePlane = abs(glm::dot(planeNormal, cueBallContactPoint - planePosition)) < eEPSILON;
+  //bool hasContactForce = glm::dot(planeNormal, cueBallForce) < 0;
+  //bool movingAlongThePlane = abs(glm::dot(planeNormal, cueBallVelocity)) < eEPSILON;
+  //if (onThePlane) {
+  //  if (hasContactForce) {
+  //    glm::vec3 contactForce = -glm::dot(planeNormal, cueBallForce) * planeNormal;
+  //    cueBall.addForce(contactForce);
+  //  }
+  //  if (movingAlongThePlane) {
+  //    glm::vec3 friction = coefFriction * glm::dot(planeNormal, cueBallForce) * vt;
+  //    cueBall.addForce(friction);
+  //  }
+  //}
+  
+  constexpr float eEPSILON = 0.01f;
+  constexpr float coefResist = 0.8f;
+  constexpr float coefKineticFriction = 20.0f;
+  constexpr float coefStaticFriction = coefKineticFriction * 2.0f;
+  constexpr float thresholdSlidingSpeed = 0.01f;
+  constexpr float coefSpinningSpeedDown = 1.0f;
+
+  auto&& planeNormal = plane.getNormal();
+  auto&& cueBallPosition = cueBall.getPosition();
+  auto&& cueBallRadius = cueBall.getRadius();
+  auto&& cueBallVelocity = cueBall.getVelocity();
+  auto&& cueBallForce = cueBall.getForce();
+  auto&& contactPoint = cueBallPosition - cueBallRadius * planeNormal;
+  auto&& centerToContactPoint = contactPoint - cueBallPosition;
+  auto&& contactForce = glm::dot(cueBallForce, planeNormal) * planeNormal;
+  contactForce = glm::dot(contactForce, planeNormal) < 0.0f ? contactForce : glm::zero<glm::vec3>();
+
+  auto&& vn = glm::dot(cueBallVelocity, planeNormal) * planeNormal;
+  auto&& vt = cueBallVelocity - vn;
+
+  auto&& cueBallAngularVelocity = cueBall.getAngularVelocity();
+  auto&& contactPointVelocityAngularTerm = glm::cross(cueBallAngularVelocity, centerToContactPoint);
+  auto&& contactPointOnPlaneVelocityAngularTerm =
+      contactPointVelocityAngularTerm - glm::dot(contactPointVelocityAngularTerm, planeNormal) * planeNormal;
+  auto&& contactPointOnPlaneVelocity = vt + contactPointOnPlaneVelocityAngularTerm;
+
+  bool onPlane = glm::dot(contactPoint - plane.getPosition(), planeNormal) < eEPSILON;
+  bool headingIn = glm::dot(cueBallVelocity, planeNormal) < 0.0f;
+  bool hasContactForce = glm::length(contactForce) > 0.0f;
+  bool sliding = glm::length(contactPointOnPlaneVelocity) > thresholdSlidingSpeed;
+  bool rotatingAroundPlaneNormal = glm::dot(cueBallAngularVelocity, planeNormal) != 0.0f;
+
+  if (onPlane) {
+    if (headingIn) {
+      cueBall.setVelocity(vt + -coefResist * vn);
     }
+    if (hasContactForce) {
+      cueBall.addForce(-contactForce);
+    }
+    if (sliding) { // sliding, use kinetic friction
+      auto&& friction = -coefKineticFriction * contactPointOnPlaneVelocity;
+      auto&& torque = glm::cross(centerToContactPoint, friction);
+      cueBall.addForce(friction);
+      cueBall.addTorque(torque);
+    } else { // rolling or stationary, use static friction
+      auto&& friction = -coefStaticFriction * vt; // vt is 0 in case of stationary, so no friction will be applied
+      auto&& torque = glm::cross(centerToContactPoint, -friction);
+      cueBall.addForce(friction);
+      cueBall.addTorque(torque);
+    }
+    if (rotatingAroundPlaneNormal) {
+      auto&& angularVelocityAlongPlaneNormal = glm::dot(cueBallAngularVelocity, planeNormal) * planeNormal;
+      auto&& torque = -coefSpinningSpeedDown * angularVelocityAlongPlaneNormal;
+      cueBall.addTorque(torque);
+    }
+  }
 }
 
 void Physics::integrate() {
-  for (int i = 0; i < cueBallCount; i++) {
-    CueBall* cueBall = &cueBalls[i];
-    glm::vec3 force = cueBall->getForce();
-    float mass = cueBall->getMass();
-    cueBall->setAcceleration(force / mass);
-    glm::vec3 acceleration = cueBall->getAcceleration();
-    cueBall->addVelocity(acceleration * deltaTime);
-
-    float d = 0.001f;
-    if (glm::length(cueBall->getVelocity()) < d)
-        cueBall->setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
-
-    glm::vec3 velocity = cueBall->getVelocity();
-    cueBall->addPosition(velocity * deltaTime);
+  for (auto&& cueBall : cueBalls) {
+    cueBall.addLinearMomentum(cueBall.getForce() * deltaTime);
+    cueBall.addAngularMomentum(cueBall.getTorque() * deltaTime);
+    cueBall.addPosition(cueBall.getVelocity() * deltaTime);
+    auto&& angularVelocity = cueBall.getAngularVelocity();
+    if (glm::length(angularVelocity) > 0.0f)
+        cueBall.addRotation(glm::angleAxis(
+            glm::length(angularVelocity) * deltaTime,
+            glm::normalize(angularVelocity)
+        ));
   }
 }
 

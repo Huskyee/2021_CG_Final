@@ -1,2 +1,2 @@
-PlatformToolSet=v142:VCToolArchitecture=Native32Bit:VCToolsVersion=14.29.30133:TargetPlatformVersion=10.0.19041.0:
-Debug|x64|D:\研究所\計算機圖學\Final Project\2021_CG_Final\vs2019\|
+PlatformToolSet=v142:VCToolArchitecture=Native64Bit:VCToolsVersion=14.29.30133:VCServicingVersionCrtHeaders=14.29.30136:VCServicingVersionCompilers=14.29.30136:TargetPlatformVersion=10.0.19041.0:
+Debug|x64|D:\Programming\OpenGL\2021_CG_Final\vs2019\|

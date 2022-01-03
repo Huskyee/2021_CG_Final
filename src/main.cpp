@@ -361,6 +361,7 @@ int main() {
     for (int i=0; i<CUE_BALL_COUNT; i++) {
       auto cueBall = graphics::shape::Sphere::make_unique();
       glm::vec3 cueBallPosition = physics.cueBalls[i].getPosition();
+      glm::quat cueBallRotation = physics.cueBalls[i].getRotation();
       float cueBallRadius = physics.cueBalls[i].getRadius();
       glm::mat4 model = glm::translate(glm::mat4(1), cueBallPosition);
 
@@ -368,7 +369,8 @@ int main() {
       model = glm::scale(model, glm::vec3(cueBallRadius));
 
       // Maybe set rotation here
-      model = glm::rotate(model, glm::half_pi<float>(), glm::vec3(1, 0, 0));
+      //model = glm::rotate(model, glm::half_pi<float>(), glm::vec3(1, 0, 0));
+      model *= glm::mat4_cast(cueBallRotation);
 
       cueBall->setModelMatrix(model);
       meshes.emplace_back(std::move(cueBall));
