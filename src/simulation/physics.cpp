@@ -370,7 +370,7 @@ void Physics::holeDetection(CueBall* cueBall) {
         isDead = true;
       } else {
         std::cout << "Ball " << cueBallId << " in hole\n";
-        cueBall->setPosition(glm::vec3(0.0f, -1.0f * cueBallRadius, 0.0f));
+        cueBall->setPosition(glm::vec3(0.0f, -2.0f, 2.0 * cueBallId * cueBallRadius - 3.5f));
       }
     }
   }

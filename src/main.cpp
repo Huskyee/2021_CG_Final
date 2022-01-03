@@ -98,16 +98,18 @@ void resetCueBallPanel(GLFWwindow* window, simulation::Physics &physics) {
   ImGui::SetNextWindowBgAlpha(0.2f);
   if (ImGui::Begin("Reset Cue Ball Panel")) {
     ImGui::Text("Press F9 to enable/disable mouse cursor");
-    simulation::CueBall *cueBall = &(physics.cueBalls[0]);
-    ImGui::SliderFloat("Cue ball x offset", cueBall->getPositionXOffsetPointer(), -9.5f, 9.5f);
+    simulation::CueBall* cueBall = &(physics.cueBalls[0]);
+    float* XOffset = cueBall->getPositionXOffsetPointer();
+    ImGui::SliderFloat("Cue ball x offset", XOffset, -9.5f, 9.5f);
     float cueBallRadius = cueBall->getRadius();
-    cueBall->resetCueBall(glm::vec3(*cueBall->getPositionXOffsetPointer(), cueBallRadius, 10.0f));
+    cueBall->resetCueBall(glm::vec3(*XOffset, cueBallRadius, 10.0f));
     if (ImGui::Button("OK")) {
       cueBall->setExist(true);
       mouseBinded = true;
       physics.isDead = false;
       glfwSetKeyCallback(window, keyCallback);
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      *XOffset = 0.0f;
     }
   }
 
@@ -430,15 +432,7 @@ int main() {
 
       cueBall->setModelMatrix(model);
       meshes.emplace_back(std::move(cueBall));
-      if (physics.cueBalls[i].getExist()) {
-        diffuseTextures.emplace_back(&cueBallTextures[i]);
-      } else {
-        if (i == 0) {
-          diffuseTextures.emplace_back(&cueBallTextures[i]);
-        } else {
-          diffuseTextures.emplace_back(&colorBlack);
-        }
-      }
+      diffuseTextures.emplace_back(&cueBallTextures[i]);
     }
     /* ============================== */
 
