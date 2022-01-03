@@ -27,6 +27,7 @@ bool isReset = false;
 bool isShot = false;
 bool isWindowSizeChanged = false;
 bool isLightChanged = true;
+bool mouseBinded = true;
 int currentLight = 0;
 int currentShader = 1;
 int alignSize = 256;
@@ -50,6 +51,13 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
   if (key == GLFW_KEY_ESCAPE) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
     return;
+  } else if (key == GLFW_KEY_F9) {
+    // Disable / enable mouse cursor.
+    if (mouseBinded)
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    else
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    mouseBinded = !mouseBinded;
   }
   switch (key) {
     // TODO: Detect key-events, to:
@@ -83,11 +91,43 @@ void resizeCallback(GLFWwindow* window, int width, int height) {
   isWindowSizeChanged = true;
 }
 
+void resetCueBallPanel(GLFWwindow* window, simulation::Physics &physics) {
+  ImGui::SetNextWindowSize(ImVec2(500.0f, 100.0f), ImGuiCond_Once);
+  ImGui::SetNextWindowCollapsed(0, ImGuiCond_Once);
+  ImGui::SetNextWindowPos(ImVec2(60.0f, 60.0f), ImGuiCond_Once);
+  ImGui::SetNextWindowBgAlpha(0.2f);
+  if (ImGui::Begin("Reset Cue Ball Panel")) {
+    ImGui::Text("Press F9 to enable/disable mouse cursor");
+    simulation::CueBall *cueBall = &(physics.cueBalls[0]);
+    ImGui::SliderFloat("Cue ball x offset", cueBall->getPositionXOffsetPointer(), -9.5f, 9.5f);
+    float cueBallRadius = cueBall->getRadius();
+    cueBall->resetCueBall(glm::vec3(*cueBall->getPositionXOffsetPointer(), cueBallRadius, 10.0f));
+    if (ImGui::Button("OK")) {
+      cueBall->setExist(true);
+      mouseBinded = true;
+      physics.isDead = false;
+      glfwSetKeyCallback(window, keyCallback);
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+  }
+
+  ImGui::End();
+}
+
+void renderUI(GLFWwindow* window, simulation::Physics& physics) {
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+  resetCueBallPanel(window, physics);
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
 int main() {
   // Initialize OpenGL context, details are wrapped in class.
   OpenGLContext::createContext(43, GLFW_OPENGL_CORE_PROFILE);
   GLFWwindow* window = OpenGLContext::getWindow();
-  glfwSetWindowTitle(window, "HW2");
+  glfwSetWindowTitle(window, "Billiard Simulation");
   glfwSetKeyCallback(window, keyCallback);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetFramebufferSizeCallback(window, resizeCallback);
@@ -96,6 +136,11 @@ int main() {
   // This is useful if you want to debug your OpenGL API calls.
   OpenGLContext::enableDebugCallback();
 #endif
+  // Initialize dear-ImGui
+  ImGui::CreateContext();
+  ImGui::StyleColorsDark();
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init("#version 410 core");
   // Initialize shader
   std::vector<graphics::shader::ShaderProgram> shaderPrograms(SHADER_PROGRAM_COUNT);
   std::string filenames[SHADER_PROGRAM_COUNT] = {"shadow", "phong", "gouraud"};
@@ -194,7 +239,6 @@ int main() {
   graphics::texture::TextureCubeMap dice;
   colorOrange.fromColor(glm::vec4(1, 0.5, 0, 1));
   colorBlack.fromColor(glm::vec4(0, 0, 0, 1));
-  transparent.fromColor(glm::vec4(0, 0, 0, 0));
   // TODO: Read texture(and set color) for objects respectively
   // Hint: check the calss of the variable(wood, colorOrange, dice) we've created for you
   //       fromFile member function
@@ -211,6 +255,7 @@ int main() {
   simulation::Physics physics = simulation::Physics();
   for (int i = 0; i < CUE_BALL_COUNT; i++) {
     simulation::CueBall cueBall = simulation::CueBall();
+    cueBall.setId(i);
     physics.cueBalls.push_back(cueBall);
   }
   physics.reset();
@@ -316,7 +361,7 @@ int main() {
     }
 
     // Update camera's uniforms if camera moves.
-    bool isCameraMove = currentCamera->move(window);
+    bool isCameraMove = mouseBinded ? currentCamera->move(window) : false;
     if (isCameraMove || isWindowSizeChanged) {
       isWindowSizeChanged = false;
       cameraUBO.load(0, sizeof(glm::mat4), currentCamera->getViewProjectionMatrixPTR());
@@ -388,7 +433,11 @@ int main() {
       if (physics.cueBalls[i].getExist()) {
         diffuseTextures.emplace_back(&cueBallTextures[i]);
       } else {
-        diffuseTextures.emplace_back(&transparent);
+        if (i == 0) {
+          diffuseTextures.emplace_back(&cueBallTextures[i]);
+        } else {
+          diffuseTextures.emplace_back(&colorBlack);
+        }
       }
     }
     /* ============================== */
@@ -433,6 +482,12 @@ int main() {
       diffuseTextures.pop_back();
     }
     /* ============================ */
+    
+    if (physics.isDead) {
+      glfwSetCursorPosCallback(window, nullptr);
+      //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+      renderUI(window, physics);
+    }
 
 #ifdef __APPLE__
     // Some platform need explicit glFlush
@@ -442,3 +497,4 @@ int main() {
   }
   return 0;
 }
+

@@ -51,6 +51,12 @@
     <Filter Include="來源檔案\simulation">
       <UniqueIdentifier>{52206ca9-aaaf-468f-b6d4-0e1418e52150}</UniqueIdentifier>
     </Filter>
+    <Filter Include="來源檔案\imgui">
+      <UniqueIdentifier>{b77abbb2-800e-48d3-b5d2-269b1499411c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\imgui">
+      <UniqueIdentifier>{d6c391f7-7bf6-4a01-8fa3-145a85231e97}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\camera\camera.cpp">
@@ -115,6 +121,27 @@
     </ClCompile>
     <ClCompile Include="..\..\src\simulation\mPlane.cpp">
       <Filter>來源檔案\simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imgui\imgui.cpp">
+      <Filter>來源檔案\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imgui\imgui_demo.cpp">
+      <Filter>來源檔案\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imgui\imgui_draw.cpp">
+      <Filter>來源檔案\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imgui\imgui_impl_glfw.cpp">
+      <Filter>來源檔案\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imgui\imgui_impl_opengl3.cpp">
+      <Filter>來源檔案\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imgui\imgui_tables.cpp">
+      <Filter>來源檔案\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imgui\imgui_widgets.cpp">
+      <Filter>來源檔案\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -192,6 +219,33 @@
     </ClInclude>
     <ClInclude Include="..\..\include\simulation\mPlane.h">
       <Filter>標頭檔\simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\imgui\imconfig.h">
+      <Filter>標頭檔\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\imgui\imgui.h">
+      <Filter>標頭檔\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\imgui\imgui_impl_glfw.h">
+      <Filter>標頭檔\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\imgui\imgui_impl_opengl3.h">
+      <Filter>標頭檔\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\imgui\imgui_internal.h">
+      <Filter>標頭檔\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\imgui\imstb_rectpack.h">
+      <Filter>標頭檔\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\imgui\imstb_textedit.h">
+      <Filter>標頭檔\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\imgui\imstb_truetype.h">
+      <Filter>標頭檔\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\imgui\imgui_impl_opengl3_loader.h">
+      <Filter>標頭檔\imgui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

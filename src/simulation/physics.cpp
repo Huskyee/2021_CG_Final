@@ -51,6 +51,7 @@ namespace simulation {
 Physics::Physics()
 	: cueBallCount(16),
       deltaTime(0.01f),
+      isDead(false),
       gravity(glm::vec3(0.0f, -9.8f, 0.0f))
 {
     //      y                _____6_____
@@ -296,24 +297,28 @@ void Physics::reset() {
 }
 
 void Physics::resolveCollision() {
-    int iteration = 10;
-    // this d should be smaller than the one used when applying force due to collision
-    float d = 0.001f;
+  int iteration = 10;
+  // this d should be smaller than the one used when applying force due to collision
+  float d = 0.001f;
 
-    for (int k = 0; k < iteration; k++) {
-        // ball and ball
-        for (int i = 0; i < cueBallCount; i++) {
-            for (int j = i + 1; j < cueBallCount; j++) {
-                resolveCollision(cueBalls[i], cueBalls[j], d);
-            }
+  for (int k = 0; k < iteration; k++) {
+    // ball and ball
+    for (int i = 0; i < cueBallCount; i++) {
+      for (int j = i + 1; j < cueBallCount; j++) {
+        if (cueBalls[i].getExist()) {
+          resolveCollision(cueBalls[i], cueBalls[j], d);
         }
-        // ball and table (only consider 7 planes)
-        for (int i = 0; i < 7; i++) {
-            for (int j = 0; j < cueBallCount; j++) {
-                resolveCollision(cueBalls[j], tablePlanes[i], d);
-            }
-        }
+      }
     }
+    // ball and table (only consider 7 planes)
+    for (int i = 0; i < 7; i++) {
+      for (int j = 0; j < cueBallCount; j++) {
+        if (cueBalls[j].getExist()) {
+          resolveCollision(cueBalls[j], tablePlanes[i], d);
+        }
+      }
+    }
+  }
 }
 
 void Physics::resolveCollision(CueBall& cueBallA, CueBall& cueBallB, float d) {
@@ -352,14 +357,21 @@ void Physics::resolveCollision(CueBall& cueBall, const MPlane& plane, float d) {
 
 void Physics::holeDetection(CueBall* cueBall) {
   for (int i = 0; i < 6; i++) {
-    float eEPSILON = 0.4f;
+    float eEPSILON = 0.7f;
     float cueBallRadius = cueBall->getRadius();
+    int cueBallId = cueBall->getId();
     glm::vec3 cueBallPosition = cueBall->getPosition();
     glm::vec3 holePosition = holePositionList[i];
     float distance = glm::length(cueBallPosition - holePosition) - cueBallRadius;
     if (distance < eEPSILON) {
-      std::cout << "in hole\n";
       cueBall->setExist(false);
+      if (cueBallId == 0) {
+        std::cout << "Dead\n";
+        isDead = true;
+      } else {
+        std::cout << "Ball " << cueBallId << " in hole\n";
+        cueBall->setPosition(glm::vec3(0.0f, -1.0f * cueBallRadius, 0.0f));
+      }
     }
   }
 }

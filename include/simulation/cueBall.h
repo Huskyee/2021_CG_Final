@@ -5,8 +5,10 @@
 namespace simulation {
 class CueBall {
  private:
+  int id;
   float mass = 5.0f;
   float radius = 0.5f;
+  float positionXOffset = 0.0f;
   bool isExist = true;
   glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
   glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -22,8 +24,10 @@ class CueBall {
   //  getter
   //==========================================
 
+  int getId() const;
   float getMass() const;
   float getRadius() const;
+  float *getPositionXOffsetPointer();
   bool getExist() const;
   glm::vec3 getPosition() const;
   glm::vec3 getVelocity() const;
@@ -35,6 +39,7 @@ class CueBall {
   //  setter
   //==========================================
 
+  void setId(const int _id);
   void setMass(const float _mass);
   void setRadius(const float _radius);
   void setExist(const bool _isExist);

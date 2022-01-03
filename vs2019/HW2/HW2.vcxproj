@@ -155,10 +155,11 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <DisableLanguageExtensions>true</DisableLanguageExtensions>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <LanguageStandard_C>Default</LanguageStandard_C>
       <CompileAs>Default</CompileAs>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -197,6 +198,13 @@
     <ClCompile Include="..\..\src\camera\camera.cpp" />
     <ClCompile Include="..\..\src\camera\quat_camera.cpp" />
     <ClCompile Include="..\..\src\context_manager.cpp" />
+    <ClCompile Include="..\..\src\imgui\imgui.cpp" />
+    <ClCompile Include="..\..\src\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\..\src\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\..\src\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\..\src\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\..\src\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\..\src\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\..\src\light\directionallight.cpp" />
     <ClCompile Include="..\..\src\light\pointlight.cpp" />
     <ClCompile Include="..\..\src\light\spotlight.cpp" />
@@ -221,6 +229,15 @@
     <ClInclude Include="..\..\include\camera\quat_camera.h" />
     <ClInclude Include="..\..\include\filesystem.h" />
     <ClInclude Include="..\..\include\graphics.h" />
+    <ClInclude Include="..\..\include\imgui\imconfig.h" />
+    <ClInclude Include="..\..\include\imgui\imgui.h" />
+    <ClInclude Include="..\..\include\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="..\..\include\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\..\include\imgui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="..\..\include\imgui\imgui_internal.h" />
+    <ClInclude Include="..\..\include\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\..\include\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\..\include\imgui\imstb_truetype.h" />
     <ClInclude Include="..\..\include\light\directionallight.h" />
     <ClInclude Include="..\..\include\light\light.h" />
     <ClInclude Include="..\..\include\light\pointlight.h" />

@@ -10,8 +10,10 @@ CueBall::CueBall(glm::vec3 _position) { position = _position; }
 //  getter
 //==========================================
 
+int CueBall::getId() const { return id; }
 float CueBall::getMass() const { return mass; }
 float CueBall::getRadius() const { return radius; }
+float *CueBall::getPositionXOffsetPointer() { return &positionXOffset; }
 bool CueBall::getExist() const { return isExist; }
 glm::vec3 CueBall::getPosition() const { return position; }
 glm::vec3 CueBall::getVelocity() const { return velocity; }
@@ -22,6 +24,8 @@ glm::quat CueBall::getRotation() const { return rotation; }
 //==========================================
 //  setter
 //==========================================
+void CueBall::setId(const int _id) { id = _id; }
+
 void CueBall::setMass(const float _mass) { mass = _mass; }
 
 void CueBall::setRadius(const float _radius) { mass = _radius; }
