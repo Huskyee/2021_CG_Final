@@ -163,23 +163,27 @@ void Physics::computeCueBallPairForce(CueBall& cueBallA, CueBall& cueBallB, floa
             cueBallA.addForce(AMass * (newASpeed - ASpeed) * ABDir / deltaTime);
             cueBallB.addForce(BMass * (newBSpeed - BSpeed) * ABDir / deltaTime);
 
-            //if (AToBSpeed > 0.0f) {
-            //  glm::vec3 Va = cueBallA.getVelocity();
-            //  glm::vec3 ABVecProjOnVa = glm::dot(ABVec, Va) / (ABLength * glm::length(Va)) * ABVec;
-            //  float torqueRadius = glm::length(ABVec - ABVecProjOnVa);
-            //  bool isClockWise = glm::cross(Va, ABVec).y > 0.0f;
-            //  glm::vec3 torque = glm::vec3(0.0f, BMass * (newBSpeed-BSpeed) / deltaTime * torqueRadius, 0.0f);
-            //  cueBallB.addTorque(torque * (isClockWise ? 1.0f : -1.0f));
-            //}
+            if (AToBSpeed > 0.0f) {
+              glm::vec3 Va = cueBallA.getVelocity();
+              glm::vec3 ABVecProjOnVa = glm::dot(ABVec, Va) / (ABLength * glm::length(Va)) * ABVec;
+              float torqueRadius = glm::length(ABVec - ABVecProjOnVa);
+              bool isClockWise = glm::cross(Va, ABVec).y > 0.0f;
+              glm::vec3 torque = glm::vec3(0.0f, BMass * (newBSpeed-BSpeed) / deltaTime * torqueRadius, 0.0f);
+              if (glm::length(torque) > 0.0f) {
+                cueBallB.addTorque(torque * (isClockWise ? 1.0f : -1.0f));
+              }
+            }
 
-            //if (BToASpeed > 0.0f) {
-            //  glm::vec3 Vb = cueBallB.getVelocity();
-            //  glm::vec3 BAVecProjOnVb = glm::dot(-ABVec, Vb) / (ABLength * glm::length(Vb)) * -ABVec;
-            //  float torqueRadius = glm::length(-ABVec - BAVecProjOnVb);
-            //  bool isClockWise = glm::cross(Vb, -ABVec).y > 0.0f;
-            //  glm::vec3 torque = glm::vec3(0.0f, AMass * (newASpeed-ASpeed) / deltaTime * torqueRadius, 0.0f);
-            //  cueBallA.addTorque(torque * (isClockWise ? 1.0f : -1.0f));
-            //}
+            if (BToASpeed > 0.0f) {
+              glm::vec3 Vb = cueBallB.getVelocity();
+              glm::vec3 BAVecProjOnVb = glm::dot(-ABVec, Vb) / (ABLength * glm::length(Vb)) * -ABVec;
+              float torqueRadius = glm::length(-ABVec - BAVecProjOnVb);
+              bool isClockWise = glm::cross(Vb, -ABVec).y > 0.0f;
+              glm::vec3 torque = glm::vec3(0.0f, AMass * (newASpeed-ASpeed) / deltaTime * torqueRadius, 0.0f);
+              if (glm::length(torque) > 0.0f) {
+                cueBallA.addTorque(torque * (isClockWise ? 1.0f : -1.0f));
+              }
+            }
         }
         // =========================================================
     }
