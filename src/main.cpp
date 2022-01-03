@@ -41,6 +41,11 @@ constexpr int PLANE_COUNT = 21;
 constexpr int HOLE_COUNT = 6;
 constexpr int MESH_COUNT = PLANE_COUNT + HOLE_COUNT + CUE_BALL_COUNT;
 constexpr int SHADER_PROGRAM_COUNT = 3;
+#ifdef __APPLE__
+int mouseToggleKey = GLFW_KEY_9;
+#else
+int mouseToggleKey = GLFW_KEY_F9;
+#endif
 }  // namespace
 
 int uboAlign(int i) { return ((i + 1 * (alignSize - 1)) / alignSize) * alignSize; }
@@ -52,7 +57,7 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
   if (key == GLFW_KEY_ESCAPE) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
     return;
-  } else if (key == GLFW_KEY_F9) {
+  } else if (key == mouseToggleKey) {
     // Disable / enable mouse cursor.
     if (mouseBinded)
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -288,7 +293,7 @@ int main() {
     std::vector<GLuint> indexData;
     glm::mat4 model;
     for (int i = 0; i < PLANE_COUNT; i++) {
-      float isWood = (i > 12) ? true : false;
+      bool isWood = (i > 12);
       simulation::MPlane tableplane = physics.tablePlanes[i];
       float planeWidth = tableplane.getWidth();
       float planeHeight = tableplane.getHeight();
@@ -379,7 +384,7 @@ int main() {
     }
 
     // Update camera's uniforms if camera moves.
-    bool isCameraMove = mouseBinded ? currentCamera->move(window) : false;
+    bool isCameraMove = mouseBinded && currentCamera->move(window);
     if (isCameraMove || isWindowSizeChanged) {
       isWindowSizeChanged = false;
       cameraUBO.load(0, sizeof(glm::mat4), currentCamera->getViewProjectionMatrixPTR());
