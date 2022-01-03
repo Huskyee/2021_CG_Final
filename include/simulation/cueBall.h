@@ -8,6 +8,10 @@ namespace simulation {
 
 class CueBall {
  private:
+  int id;
+  float positionXOffset = 0.0f;
+  bool isExist = true;
+
   float radius;
   float mass;
   glm::mat3 inertiaBody;
@@ -33,6 +37,10 @@ class CueBall {
   //  getter
   //==========================================
 
+  int getId() const;
+  float *getPositionXOffsetPointer();
+  bool getExist() const;
+
   float getRadius() const;
   float getMass() const;
   glm::mat3 getInertiaBody() const;
@@ -55,6 +63,9 @@ class CueBall {
   //==========================================
   //  setter
   //==========================================
+
+  void setId(const int _id);
+  void setExist(const bool _isExist);
 
   void setPosition(const glm::vec3 &_position);
   void setRotation(const glm::quat &_rotation);

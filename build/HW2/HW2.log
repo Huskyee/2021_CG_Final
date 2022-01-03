@@ -1,3 +1,3 @@
 ﻿  physics.cpp
-D:\Programming\OpenGL\2021_CG_Final\src\simulation\physics.cpp(24,14): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+D:\Programming\OpenGL\2021_CG_Final\src\simulation\physics.cpp(4,14): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
   HW2.vcxproj -> D:\Programming\OpenGL\2021_CG_Final\bin\HW2.exe

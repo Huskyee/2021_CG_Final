@@ -17,6 +17,10 @@ CueBall::CueBall(const glm::vec3 &_position, const glm::quat &_rotation, float _
 //  getter
 //==========================================
 
+int CueBall::getId() const { return id; }
+float *CueBall::getPositionXOffsetPointer() { return &positionXOffset; }
+bool CueBall::getExist() const { return isExist; }
+
 float CueBall::getRadius() const { return radius; }
 float CueBall::getMass() const { return mass; }
 glm::mat3 CueBall::getInertiaBody() const { return inertiaBody; }
@@ -42,6 +46,8 @@ glm::vec3 CueBall::getTorque() const { return torque; }
 //==========================================
 //  setter
 //==========================================
+void CueBall::setId(const int _id) { id = _id; }
+void CueBall::setExist(const bool _isExist) { isExist = _isExist; }
 
 void CueBall::setPosition(const glm::vec3 &_position) { position = _position; }
 void CueBall::setRotation(const glm::quat &_rotation) { rotation = _rotation; }

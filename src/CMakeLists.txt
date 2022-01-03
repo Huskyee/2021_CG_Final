@@ -21,6 +21,13 @@ set(HW2_SOURCE
   ${HW2_SOURCE_DIR}/simulation/cueBall.cpp
   ${HW2_SOURCE_DIR}/simulation/mPlane.cpp
   ${HW2_SOURCE_DIR}/simulation/physics.cpp
+  ${HW2_SOURCE_DIR}/imgui/imgui.cpp
+  ${HW2_SOURCE_DIR}/imgui/imgui_demo.cpp
+  ${HW2_SOURCE_DIR}/imgui/imgui_draw.cpp
+  ${HW2_SOURCE_DIR}/imgui/imgui_impl_glfw.cpp
+  ${HW2_SOURCE_DIR}/imgui/imgui_impl_opengl3.cpp
+  ${HW2_SOURCE_DIR}/imgui/imgui_tables.cpp
+  ${HW2_SOURCE_DIR}/imgui/imgui_widgets.cpp
   ${HW2_SOURCE_DIR}/main.cpp
 )
 
@@ -50,6 +57,14 @@ set(HW2_HEADER
   ${HW2_INCLUDE_DIR}/simulation/cueBall.h
   ${HW2_INCLUDE_DIR}/simulation/mPlane.h
   ${HW2_INCLUDE_DIR}/simulation/physics.h
+  ${HW2_INCLUDE_DIR}/imgui/imgui.h
+  ${HW2_INCLUDE_DIR}/imgui/imgui_impl_glfw.h
+  ${HW2_INCLUDE_DIR}/imgui/imgui_impl_opengl3.h
+  ${HW2_INCLUDE_DIR}/imgui/imgui_impl_opengl3_loader.h
+  ${HW2_INCLUDE_DIR}/imgui/imgui_internal.h
+  ${HW2_INCLUDE_DIR}/imgui/imstb_rectpack.h
+  ${HW2_INCLUDE_DIR}/imgui/imstb_textedit.h
+  ${HW2_INCLUDE_DIR}/imgui/imstb_truetype.h
   ${HW2_INCLUDE_DIR}/utils.h
 
 )

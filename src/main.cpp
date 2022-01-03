@@ -27,15 +27,17 @@ bool isReset = false;
 bool isShot = false;
 bool isWindowSizeChanged = false;
 bool isLightChanged = true;
+bool mouseBinded = true;
 int currentLight = 0;
 int currentShader = 1;
 int alignSize = 256;
+float shootForce = 10000.0f;
 // TODO (optional): Configs
 // You should change line 32-35 if you add more shader / light / camera / mesh.
 constexpr int LIGHT_COUNT = 3;
 constexpr int CAMERA_COUNT = 1;
 constexpr int CUE_BALL_COUNT = 16;
-constexpr int PLANE_COUNT = 5;
+constexpr int PLANE_COUNT = 21;
 constexpr int HOLE_COUNT = 6;
 constexpr int MESH_COUNT = PLANE_COUNT + HOLE_COUNT + CUE_BALL_COUNT;
 constexpr int SHADER_PROGRAM_COUNT = 3;
@@ -50,6 +52,13 @@ void keyCallback(GLFWwindow* window, int key, int, int action, int) {
   if (key == GLFW_KEY_ESCAPE) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
     return;
+  } else if (key == GLFW_KEY_F9) {
+    // Disable / enable mouse cursor.
+    if (mouseBinded)
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    else
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    mouseBinded = !mouseBinded;
   }
   switch (key) {
     // TODO: Detect key-events, to:
@@ -83,11 +92,60 @@ void resizeCallback(GLFWwindow* window, int width, int height) {
   isWindowSizeChanged = true;
 }
 
+void resetCueBallPanel(GLFWwindow* window, simulation::Physics& physics) {
+  ImGui::SetNextWindowSize(ImVec2(300.0f, 100.0f), ImGuiCond_Once);
+  ImGui::SetNextWindowCollapsed(0, ImGuiCond_Once);
+  ImGui::SetNextWindowPos(ImVec2(20.0f, 140.0f), ImGuiCond_Once);
+  ImGui::SetNextWindowBgAlpha(0.2f);
+  if (ImGui::Begin("Reset Cue Ball Panel")) {
+    ImGui::Text("Cue ball x offset:");
+    simulation::CueBall* cueBall = &(physics.cueBalls[0]);
+    float* XOffset = cueBall->getPositionXOffsetPointer();
+    ImGui::SliderFloat(" ", XOffset, -9.5f, 9.5f);
+    float cueBallRadius = cueBall->getRadius();
+    cueBall->resetCueBall(glm::vec3(*XOffset, cueBallRadius, 10.0f));
+    if (ImGui::Button("OK")) {
+      cueBall->setExist(true);
+      mouseBinded = true;
+      physics.isDead = false;
+      glfwSetKeyCallback(window, keyCallback);
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      *XOffset = 0.0f;
+    }
+  }
+
+  ImGui::End();
+}
+
+void forceControlPanel() {
+  ImGui::SetNextWindowSize(ImVec2(300.0f, 100.0f), ImGuiCond_Once);
+  ImGui::SetNextWindowCollapsed(0, ImGuiCond_Once);
+  ImGui::SetNextWindowPos(ImVec2(20.0f, 20.0f), ImGuiCond_Once);
+  ImGui::SetNextWindowBgAlpha(0.2f);
+  if (ImGui::Begin("Force Control Panel")) {
+    ImGui::Text("Press F9 to enable/disable mouse cursor.");
+    ImGui::Text("Shoot Force:");
+    ImGui::SliderFloat(" ", &shootForce, 1000.0f, 20000.0f);
+  }
+
+  ImGui::End();
+}
+
+void renderUI(GLFWwindow* window, simulation::Physics& physics) {
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+  if(physics.isDead) resetCueBallPanel(window, physics);
+  forceControlPanel();
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
 int main() {
   // Initialize OpenGL context, details are wrapped in class.
   OpenGLContext::createContext(43, GLFW_OPENGL_CORE_PROFILE);
   GLFWwindow* window = OpenGLContext::getWindow();
-  glfwSetWindowTitle(window, "HW2");
+  glfwSetWindowTitle(window, "Billiard Simulation");
   glfwSetKeyCallback(window, keyCallback);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetFramebufferSizeCallback(window, resizeCallback);
@@ -96,6 +154,11 @@ int main() {
   // This is useful if you want to debug your OpenGL API calls.
   OpenGLContext::enableDebugCallback();
 #endif
+  // Initialize dear-ImGui
+  ImGui::CreateContext();
+  ImGui::StyleColorsDark();
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init("#version 410 core");
   // Initialize shader
   std::vector<graphics::shader::ShaderProgram> shaderPrograms(SHADER_PROGRAM_COUNT);
   std::string filenames[SHADER_PROGRAM_COUNT] = {"shadow", "phong", "gouraud"};
@@ -190,7 +253,7 @@ int main() {
   // Texture
   graphics::texture::ShadowMap shadow(maxTextureSize);
   graphics::texture::Texture2D cueBallTextures[CUE_BALL_COUNT];
-  graphics::texture::Texture2D colorOrange, colorBlack, wood, cloth;
+  graphics::texture::Texture2D colorOrange, colorBlack, transparent, wood, cloth;
   graphics::texture::TextureCubeMap dice;
   colorOrange.fromColor(glm::vec4(1, 0.5, 0, 1));
   colorBlack.fromColor(glm::vec4(0, 0, 0, 1));
@@ -202,7 +265,7 @@ int main() {
   dice.fromFile("../assets/texture/posx.jpg", "../assets/texture/negx.jpg", "../assets/texture/posy.jpg",
                 "../assets/texture/negy.jpg", "../assets/texture/posz.jpg", "../assets/texture/negz.jpg");
   
-  for (int i =0; i<CUE_BALL_COUNT; i++) {
+  for (int i = 0; i < CUE_BALL_COUNT; i++) {
     cueBallTextures[i].fromFile("../assets/texture/" + std::to_string(i) + ".jpeg");
   }
 
@@ -210,6 +273,7 @@ int main() {
   simulation::Physics physics = simulation::Physics();
   for (int i = 0; i < CUE_BALL_COUNT; i++) {
     simulation::CueBall cueBall = simulation::CueBall();
+    cueBall.setId(i);
     physics.cueBalls.push_back(cueBall);
   }
   physics.reset();
@@ -219,35 +283,43 @@ int main() {
   std::vector<graphics::shape::ShapePTR> meshes;
   std::vector<graphics::texture::Texture*> diffuseTextures;
   {
+    // Planes
     std::vector<GLfloat> vertexData;
     std::vector<GLuint> indexData;
     glm::mat4 model;
     for (int i = 0; i < PLANE_COUNT; i++) {
+      float isWood = (i > 12) ? true : false;
       simulation::MPlane tableplane = physics.tablePlanes[i];
       float planeWidth = tableplane.getWidth();
       float planeHeight = tableplane.getHeight();
       glm::vec3 planePosition = tableplane.getPosition();
       glm::quat planeRotation = tableplane.getRotation();
       
-      graphics::shape::Plane::generateVertices(vertexData, indexData, 40, planeWidth / 2, planeHeight / 2, false);
+      graphics::shape::Plane::generateVertices(vertexData, indexData, 40, planeWidth / 2, planeHeight / 2, isWood);
       auto plane = graphics::shape::Plane::make_unique(vertexData, indexData);
       model = glm::translate(glm::mat4(1), planePosition);
       model = glm::rotate(model, glm::angle(planeRotation), glm::axis(planeRotation));
       plane->setModelMatrix(model);
       meshes.emplace_back(std::move(plane));
-      diffuseTextures.emplace_back(&cloth);
+      if (isWood) {
+        diffuseTextures.emplace_back(&wood);
+      } else {
+        diffuseTextures.emplace_back(&cloth);
+      }
 
       vertexData.clear();
       indexData.clear();
     }
-    std::vector<glm::vec3> holePosition = {glm::vec3(-10.0f, 0.0f, -20.0f), glm::vec3(10.0f, 0.0f, -20.0f),
-                                           glm::vec3(-10.0f, 0.0f, 0.0f),   glm::vec3(10.0f, 0.0f, 0.0f),
-                                           glm::vec3(-10.0f, 0.0f, 20.0f),  glm::vec3(10.0f, 0.0f, 20.0f)};
+
+    // Holes
+    std::vector<glm::vec3> holePosition = {glm::vec3(-10.0f, -0.05f, -20.0f), glm::vec3(10.0f, -0.05f, -20.0f),
+                                           glm::vec3(-10.45f, -0.5f, 0.0f),   glm::vec3(10.45f, -0.5f, 0.0f),
+                                           glm::vec3(-10.0f, -0.05f, 20.0f),   glm::vec3(10.0f, -0.05f, 20.0f)};
 
     for (int i = 0; i < HOLE_COUNT; i++) {
       auto sphere = graphics::shape::Sphere::make_unique();
       model = glm::translate(glm::mat4(1), holePosition[i]);
-      model = glm::scale(model, glm::vec3(1.5f));
+      model = glm::scale(model, glm::vec3(1.0f));
       sphere->setModelMatrix(model);
       meshes.emplace_back(std::move(sphere));
       diffuseTextures.emplace_back(&colorBlack);
@@ -307,7 +379,7 @@ int main() {
     }
 
     // Update camera's uniforms if camera moves.
-    bool isCameraMove = currentCamera->move(window);
+    bool isCameraMove = mouseBinded ? currentCamera->move(window) : false;
     if (isCameraMove || isWindowSizeChanged) {
       isWindowSizeChanged = false;
       cameraUBO.load(0, sizeof(glm::mat4), currentCamera->getViewProjectionMatrixPTR());
@@ -345,16 +417,20 @@ int main() {
 
 
     /* ===== Do Physics Simulation here ===== */
+    static float lastUpdateTime = 0.0f;
+    float currentTime = glfwGetTime();
+    float deltaTime = currentTime - lastUpdateTime;
+    lastUpdateTime = currentTime;
+    physics.setDeltaTime(deltaTime);
     physics.resolveCollision();
     physics.computeAllForce();
     // Shot
     if (isShot) {
       simulation::CueBall* cueBall = &physics.cueBalls[0];
-//      cueBall->addForce(glm::vec3(0.0f, 0.0f, -10000.0f));
       glm::vec3 shotDirection = cueBall->getPosition() - glm::vec3(currentCamera->getPosition());
       shotDirection.y = 0;
       shotDirection = glm::normalize(shotDirection);
-      cueBall->addForce(shotDirection * 10000.f);
+      cueBall->addForce(shotDirection * shootForce);
       isShot = false;
     }
     physics.integrate();
@@ -422,6 +498,8 @@ int main() {
       diffuseTextures.pop_back();
     }
     /* ============================ */
+    
+    renderUI(window, physics);
 
 #ifdef __APPLE__
     // Some platform need explicit glFlush
@@ -431,3 +509,4 @@ int main() {
   }
   return 0;
 }
+

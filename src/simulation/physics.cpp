@@ -1,28 +1,11 @@
 #include "simulation/physics.h"
 #include "simulation/mPlane.h"
 
-
-//glm::vec3 position_list[16] = {
-//    glm::vec3(0.0f, 3.0f, 0.0f),
-//    glm::vec3(1.0f, 3.0f, 0.0f),
-//    glm::vec3(2.0f, 3.0f, 0.0f), 
-//    glm::vec3(3.0f, 3.0f, 0.0f), 
-//    glm::vec3(4.0f, 3.0f, 0.0f), 
-//    glm::vec3(5.0f, 3.0f, 0.0f), 
-//    glm::vec3(6.0f, 3.0f, 0.0f), 
-//    glm::vec3(7.0f, 3.0f, 0.0f),
-//    glm::vec3(8.0f, 3.0f, 0.0f), 
-//    glm::vec3(9.0f, 3.0f, 0.0f), 
-//    glm::vec3(10.0f, 3.0f, 0.0f), 
-//    glm::vec3(11.0f, 3.0f, 0.0f),
-//    glm::vec3(12.0f, 3.0f, 0.0f), 
-//    glm::vec3(13.0f, 3.0f, 0.0f), 
-//    glm::vec3(14.0f, 3.0f, 0.0f), 
-//    glm::vec3(15.0f, 3.0f, 0.0f),
-//};
-
 float root_3 = pow(3, 0.5);
 float ballRadius = 0.5f;
+glm::vec3 holePositionList[6] = {glm::vec3(-10.0f, 0.0f, -20.0f), glm::vec3(10.0f, 0.0f, -20.0f),
+                                 glm::vec3(-10.45f, -0.25f, 0.0f), glm::vec3(10.45f, -0.25f, 0.0f),
+                                 glm::vec3(-10.0f, 0.0f, 20.0f), glm::vec3(10.0f, 0.0f, 20.0f)};
 
 glm::vec3 cueBallPositionList[16] = {
     glm::vec3(0.0f, ballRadius, 10.0f),                                        // Cue ball
@@ -48,56 +31,105 @@ namespace simulation {
 Physics::Physics()
 	: cueBallCount(16),
       deltaTime(0.01f),
+      isDead(false),
       gravity(glm::vec3(0.0f, -9.8f, 0.0f))
 {
-    //      y
-    //      |
-    //      |
-    //      |_______ x
-    //     /
-    //    /
-    //   z   
+    //      y                _____6_____
+    //      |               |           |
+    //      |               3           1
+    //      |_______ x      |           |
+    //     /                |           |
+    //    /                 4           2
+    //   z                  |_____5_____|
     
+
     // Bottom
-    tablePlanes.emplace_back(glm::vec3(0.0f, 0.0f, 0.0f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 0.0f)), 20.0f,
+    tablePlanes.emplace_back(glm::vec3(0.0f, 0.0f, 0.0f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 20.0f,
                              40.0f);
 
-    // Right (+x)
-    tablePlanes.emplace_back(glm::vec3(10.0f, 0.5f, 0.0f),
-                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 39.0f);
-
-    // Left (-x)
-    tablePlanes.emplace_back(glm::vec3(-10.0f, 0.5f, 0.0f),
-                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 39.0f);
-
-    // Front (+z)
+    // 1
+    tablePlanes.emplace_back(glm::vec3(10.0f, 0.5f, -9.875f),
+                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 18.25f);
+    // 2
+    tablePlanes.emplace_back(glm::vec3(10.0f, 0.5f, 9.875f),
+                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 18.25f);
+    // 3
+    tablePlanes.emplace_back(glm::vec3(-10.0f, 0.5f, -9.875f),
+                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 18.25f);
+    // 4
+    tablePlanes.emplace_back(glm::vec3(-10.0f, 0.5f, 9.875f),
+                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f, 18.25f);
+    // 5
     tablePlanes.emplace_back(glm::vec3(0.0f, 0.5f, 20.0f),
-                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 19.0f, 1.0f);
-
-    // Back (-z)
+                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 18.0f, 1.0f);
+    // 6
     tablePlanes.emplace_back(glm::vec3(0.0f, 0.5f, -20.0f),
-                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 19.0f, 1.0f);
+                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 18.0f, 1.0f);
+
+    // Green (decoration)
+    tablePlanes.emplace_back(glm::vec3(10.5f, 1.0f, -9.875f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             18.25f);
+    tablePlanes.emplace_back(glm::vec3(10.5f, 1.0f, 9.875f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             18.25f);
+    tablePlanes.emplace_back(glm::vec3(-10.5f, 1.0f, -9.875f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             18.25f);
+    tablePlanes.emplace_back(glm::vec3(-10.5f, 1.0f, 9.875f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             18.25f);
+    tablePlanes.emplace_back(glm::vec3(0.0f, 1.0f, 20.5f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 18.0f,
+                             1.0f);
+    tablePlanes.emplace_back(glm::vec3(0.0f, 1.0f, -20.5f), glm::angleAxis(0.0f, glm::vec3(1.0f, 0.0f, 0.0f)), 18.0f,
+                             1.0f);
+
+    // Wood (decoration)
+    tablePlanes.emplace_back(glm::vec3(11.5f, 1.0f, 0.0f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             42.0f);
+    tablePlanes.emplace_back(glm::vec3(-11.5f, 1.0f, 0.0f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             42.0f);
+    tablePlanes.emplace_back(glm::vec3(0.0f, 1.0f, 21.5f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 24.0f,
+                             1.0f);
+    tablePlanes.emplace_back(glm::vec3(0.0f, 1.0f, -21.5f), glm::angleAxis(0.0f, glm::vec3(0.0f, 0.0f, 1.0f)), 24.0f,
+                             1.0f);
+    tablePlanes.emplace_back(glm::vec3(12.0f, 0.5f, 0.0f),
+                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             44.0f);
+    tablePlanes.emplace_back(glm::vec3(-12.0f, 0.5f, 0.0f),
+                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f)), 1.0f,
+                             44.0f);
+    tablePlanes.emplace_back(glm::vec3(0.0f, 0.5f, 22.0),
+                             glm::angleAxis(glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 24.0f,
+                             1.0f);
+    tablePlanes.emplace_back(glm::vec3(0.0f, 0.5f, -22.0),
+                             glm::angleAxis(-glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f)), 24.0f,
+                             1.0f);
 }
 
 void Physics::computeAllForce() {
   for (int i = 0; i < cueBallCount; i++) {
-    computeCueBallForce(cueBalls[i]);
+    if (cueBalls[i].getExist()) {
+      computeCueBallForce(cueBalls[i]);
+    }
   }
 
   float d = 0.002f;
   float k = 1.9f;
   float c = 0.9f;
+
   // ball and ball
   for (int i = 0; i < cueBallCount; i++) {
-      for (int j = i + 1; j < cueBallCount; j++) {
-           computeCueBallPairForce(cueBalls[i], cueBalls[j], d, c);
+    for (int j = i + 1; j < cueBallCount; j++) {
+      if (cueBalls[i].getExist()) {
+        computeCueBallPairForce(cueBalls[i], cueBalls[j], d, c);
       }
+    }
   }
-  // ball and table
-  for (int i = 0; i < tablePlanes.size(); i++) {
-      for (int j = 0; j < cueBallCount; j++) {
-          computeCueBallTableForce(cueBalls[j], tablePlanes[i], d, k);
+
+  // ball and table (consider only 7 planes)
+  for (int i = 0; i < 7; i++) {
+    for (int j = 0; j < cueBallCount; j++) {
+      if (cueBalls[j].getExist()) {
+        computeCueBallTableForce(cueBalls[j], tablePlanes[i]);
       }
+    }
   }
 }
 
@@ -131,45 +163,29 @@ void Physics::computeCueBallPairForce(CueBall& cueBallA, CueBall& cueBallB, floa
             cueBallA.addForce(AMass * (newASpeed - ASpeed) * ABDir / deltaTime);
             cueBallB.addForce(BMass * (newBSpeed - BSpeed) * ABDir / deltaTime);
 
-            if (AToBSpeed > 0.0f) {
-              glm::vec3 Va = cueBallA.getVelocity();
-              glm::vec3 ABVecProjOnVa = glm::dot(ABVec, Va) / (ABLength * glm::length(Va)) * ABVec;
-              float torqueRadius = glm::length(ABVec - ABVecProjOnVa);
-              bool isClockWise = glm::cross(Va, ABVec).y > 0.0f;
-              glm::vec3 torque = glm::vec3(0.0f, BMass * (newBSpeed-BSpeed) / deltaTime * torqueRadius, 0.0f);
-              cueBallB.addTorque(torque * (isClockWise ? 1.0f : -1.0f));
-            }
+            //if (AToBSpeed > 0.0f) {
+            //  glm::vec3 Va = cueBallA.getVelocity();
+            //  glm::vec3 ABVecProjOnVa = glm::dot(ABVec, Va) / (ABLength * glm::length(Va)) * ABVec;
+            //  float torqueRadius = glm::length(ABVec - ABVecProjOnVa);
+            //  bool isClockWise = glm::cross(Va, ABVec).y > 0.0f;
+            //  glm::vec3 torque = glm::vec3(0.0f, BMass * (newBSpeed-BSpeed) / deltaTime * torqueRadius, 0.0f);
+            //  cueBallB.addTorque(torque * (isClockWise ? 1.0f : -1.0f));
+            //}
 
-            if (BToASpeed > 0.0f) {
-              glm::vec3 Vb = cueBallB.getVelocity();
-              glm::vec3 BAVecProjOnVb = glm::dot(-ABVec, Vb) / (ABLength * glm::length(Vb)) * -ABVec;
-              float torqueRadius = glm::length(-ABVec - BAVecProjOnVb);
-              bool isClockWise = glm::cross(Vb, -ABVec).y > 0.0f;
-              glm::vec3 torque = glm::vec3(0.0f, AMass * (newASpeed-ASpeed) / deltaTime * torqueRadius, 0.0f);
-              cueBallA.addTorque(torque * (isClockWise ? 1.0f : -1.0f));
-            }
+            //if (BToASpeed > 0.0f) {
+            //  glm::vec3 Vb = cueBallB.getVelocity();
+            //  glm::vec3 BAVecProjOnVb = glm::dot(-ABVec, Vb) / (ABLength * glm::length(Vb)) * -ABVec;
+            //  float torqueRadius = glm::length(-ABVec - BAVecProjOnVb);
+            //  bool isClockWise = glm::cross(Vb, -ABVec).y > 0.0f;
+            //  glm::vec3 torque = glm::vec3(0.0f, AMass * (newASpeed-ASpeed) / deltaTime * torqueRadius, 0.0f);
+            //  cueBallA.addTorque(torque * (isClockWise ? 1.0f : -1.0f));
+            //}
         }
         // =========================================================
     }
 }
 
-void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane, float d, float k) {
-  /* glm::vec3 planeNormal = plane.getNormal();
-  // use center of ball to obtain contact point and detect collision, not accurate
-  // Fixed: use the closest point near the plane
-  glm::vec3 contact = plane.projectPointOntoPlane(cueBall.getPosition());
-  if (!plane.isPointOnPlane(contact)) return;
-  glm::vec3 centerToContactVec = contact - cueBall.getPosition();
-  float centerToContactLength = glm::length(centerToContactVec);
-  float minDistance = cueBall.getRadius() + d;
-  bool isBallStuckInPlane = glm::dot(-centerToContactVec, planeNormal) < 0.0f;
-  if (isBallStuckInPlane || centerToContactLength < minDistance) {
-      float toPlaneSpeed = glm::dot(-planeNormal, cueBall.getVelocity());
-      if (toPlaneSpeed > 0.0f) {
-          cueBall.addForce(k * cueBall.getMass() * toPlaneSpeed * planeNormal / deltaTime);
-      }
-  }*/
-
+void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane) {
   //constexpr float eEPSILON = 0.01f;
   //constexpr float coefResist = 0.8f;
   //constexpr float coefFriction = 0.03f;
@@ -249,17 +265,17 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane, fl
     if (hasContactForce) {
       cueBall.addForce(-contactForce);
     }
-//    if (sliding) { // sliding, use kinetic friction
-//      auto&& friction = -coefKineticFriction * contactPointOnPlaneVelocity;
-//      auto&& torque = glm::cross(centerToContactPoint, friction);
-//      cueBall.addForce(friction);
-//      cueBall.addTorque(torque);
-//    } else { // rolling or stationary, use static friction
-//      auto&& friction = -coefStaticFriction * vt; // vt is 0 in case of stationary, so no friction will be applied
-//      auto&& torque = glm::cross(centerToContactPoint, -friction);
-//      cueBall.addForce(friction);
-//      cueBall.addTorque(torque);
-//    }
+    if (sliding) { // sliding, use kinetic friction
+      auto&& friction = -coefKineticFriction * contactPointOnPlaneVelocity;
+      auto&& torque = glm::cross(centerToContactPoint, friction);
+      cueBall.addForce(friction);
+      cueBall.addTorque(torque);
+    } else { // rolling or stationary, use static friction
+      auto&& friction = -coefStaticFriction * vt; // vt is 0 in case of stationary, so no friction will be applied
+      auto&& torque = glm::cross(centerToContactPoint, -friction);
+      cueBall.addForce(friction);
+      cueBall.addTorque(torque);
+    }
     if (rotatingAroundPlaneNormal) {
       auto&& angularVelocityAlongPlaneNormal = glm::dot(cueBallAngularVelocity, planeNormal) * planeNormal;
       auto&& torque = -coefSpinningSpeedDown * angularVelocityAlongPlaneNormal;
@@ -270,44 +286,55 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane, fl
 
 void Physics::integrate() {
   for (auto&& cueBall : cueBalls) {
-    cueBall.addLinearMomentum(cueBall.getForce() * deltaTime);
-    cueBall.addAngularMomentum(cueBall.getTorque() * deltaTime);
-    cueBall.addPosition(cueBall.getVelocity() * deltaTime);
-    auto&& angularVelocity = cueBall.getAngularVelocity();
-    if (glm::length(angularVelocity) > 0.0f)
-        cueBall.addRotation(glm::angleAxis(
-            glm::length(angularVelocity) * deltaTime,
-            glm::normalize(angularVelocity)
-        ));
+    if (cueBall.getExist()) {
+        cueBall.addLinearMomentum(cueBall.getForce() * deltaTime);
+        cueBall.addAngularMomentum(cueBall.getTorque() * deltaTime);
+        cueBall.addPosition(cueBall.getVelocity() * deltaTime);
+        auto&& angularVelocity = cueBall.getAngularVelocity();
+        if (glm::length(angularVelocity) > 0.0f)
+            cueBall.addRotation(glm::angleAxis(
+                glm::length(angularVelocity) * deltaTime,
+                glm::normalize(angularVelocity)
+            ));
+
+        // Hole detection
+        holeDetection(&cueBall);
+    }
   }
 }
 
 void Physics::reset() {
+  std::cout << "\nReset\n";
   for (int i = 0; i < cueBallCount; i++) {
     CueBall* cueBall = &cueBalls[i];
+    cueBall->setExist(true);
     cueBall->resetCueBall(cueBallPositionList[i]);
   }
 }
 
 void Physics::resolveCollision() {
-    int iteration = 10;
-    // this d should be smaller than the one used when applying force due to collision
-    float d = 0.001f;
+  int iteration = 10;
+  // this d should be smaller than the one used when applying force due to collision
+  float d = 0.001f;
 
-    for (int k = 0; k < iteration; k++) {
-        // ball and ball
-        for (int i = 0; i < cueBallCount; i++) {
-            for (int j = i + 1; j < cueBallCount; j++) {
-                resolveCollision(cueBalls[i], cueBalls[j], d);
-            }
+  for (int k = 0; k < iteration; k++) {
+    // ball and ball
+    for (int i = 0; i < cueBallCount; i++) {
+      for (int j = i + 1; j < cueBallCount; j++) {
+        if (cueBalls[i].getExist()) {
+          resolveCollision(cueBalls[i], cueBalls[j], d);
         }
-        // ball and table
-        for (int i = 0; i < tablePlanes.size(); i++) {
-            for (int j = 0; j < cueBallCount; j++) {
-                resolveCollision(cueBalls[j], tablePlanes[i], d);
-            }
-        }
+      }
     }
+    // ball and table (only consider 7 planes)
+    for (int i = 0; i < 7; i++) {
+      for (int j = 0; j < cueBallCount; j++) {
+        if (cueBalls[j].getExist()) {
+          resolveCollision(cueBalls[j], tablePlanes[i], d);
+        }
+      }
+    }
+  }
 }
 
 void Physics::resolveCollision(CueBall& cueBallA, CueBall& cueBallB, float d) {
@@ -343,5 +370,28 @@ void Physics::resolveCollision(CueBall& cueBall, const MPlane& plane, float d) {
         cueBall.addPosition(planeNormal * moveDistance);
     }
 }
+
+void Physics::holeDetection(CueBall* cueBall) {
+  for (int i = 0; i < 6; i++) {
+    float eEPSILON = 0.7f;
+    float cueBallRadius = cueBall->getRadius();
+    int cueBallId = cueBall->getId();
+    glm::vec3 cueBallPosition = cueBall->getPosition();
+    glm::vec3 holePosition = holePositionList[i];
+    float distance = glm::length(cueBallPosition - holePosition) - cueBallRadius;
+    if (distance < eEPSILON) {
+      cueBall->setExist(false);
+      if (cueBallId == 0) {
+        std::cout << "Dead\n";
+        isDead = true;
+      } else {
+        std::cout << "Ball " << cueBallId << " in hole\n";
+        cueBall->setPosition(glm::vec3(0.0f, -2.0f, 2.0 * cueBallId * cueBallRadius - 3.5f));
+      }
+    }
+  }
+}
+
+void Physics::setDeltaTime(float _deltaTime) { deltaTime = _deltaTime; }
 
 } // namespace simulation
