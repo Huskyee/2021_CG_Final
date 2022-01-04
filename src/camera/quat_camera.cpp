@@ -68,6 +68,9 @@ void QuaternionCamera::updateProjection(float aspectRatio) {
   viewProjectionMatrix = projectionMatrix * viewMatrix;
 }
 
+float* QuaternionCamera::getKeyboardMoveSpeedPointer() { return &keyboardMoveSpeed; }
+float* QuaternionCamera::getMouseMoveSpeedPointer() { return &mouseMoveSpeed; }
+
 std::unique_ptr<QuaternionCamera> QuaternionCamera::make_unique(const glm::vec3& _position) {
   return std::make_unique<QuaternionCamera>(_position);
 }

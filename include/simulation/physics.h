@@ -12,6 +12,8 @@ class Physics {
  public:
   int cueBallCount;
   float deltaTime;
+  float coefRestitution;
+  float coefKineticFriction;
   bool isDead;
   glm::vec3 gravity;
   std::vector<CueBall> cueBalls;

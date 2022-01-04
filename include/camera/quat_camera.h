@@ -15,12 +15,14 @@ class QuaternionCamera final : public Camera {
   void updateView() override;
   void updateProjection(float aspectRatio) override;
   static std::unique_ptr<QuaternionCamera> make_unique(const glm::vec3& _position);
+  float* getKeyboardMoveSpeedPointer();
+  float* getMouseMoveSpeedPointer();
 
  private:
   glm::quat rotation;
   // TODO (optional): Change these values if your WASD or mouse move too slow or too fast.
-  constexpr static float keyboardMoveSpeed = 0.25f;
-  constexpr static float mouseMoveSpeed = 0.001f;
+  float keyboardMoveSpeed = 0.15f;
+  float mouseMoveSpeed = 0.001f;
 };
 using QuaternionCameraPTR = std::unique_ptr<QuaternionCamera>;
 }  // namespace graphics::camera

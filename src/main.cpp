@@ -31,7 +31,7 @@ bool mouseBinded = true;
 int currentLight = 0;
 int currentShader = 1;
 int alignSize = 256;
-float shootForce = 10000.0f;
+float shootForce = 25000.0f;
 // TODO (optional): Configs
 // You should change line 32-35 if you add more shader / light / camera / mesh.
 constexpr int LIGHT_COUNT = 3;
@@ -100,7 +100,7 @@ void resizeCallback(GLFWwindow* window, int width, int height) {
 void resetCueBallPanel(GLFWwindow* window, simulation::Physics& physics) {
   ImGui::SetNextWindowSize(ImVec2(300.0f, 100.0f), ImGuiCond_Once);
   ImGui::SetNextWindowCollapsed(0, ImGuiCond_Once);
-  ImGui::SetNextWindowPos(ImVec2(20.0f, 140.0f), ImGuiCond_Once);
+  ImGui::SetNextWindowPos(ImVec2(20.0f, 360.0f), ImGuiCond_Once);
   ImGui::SetNextWindowBgAlpha(0.2f);
   if (ImGui::Begin("Reset Cue Ball Panel")) {
     ImGui::Text("Cue ball x offset:");
@@ -122,15 +122,27 @@ void resetCueBallPanel(GLFWwindow* window, simulation::Physics& physics) {
   ImGui::End();
 }
 
-void forceControlPanel() {
-  ImGui::SetNextWindowSize(ImVec2(300.0f, 100.0f), ImGuiCond_Once);
+void controlPanel(simulation::Physics& physics) {
+  ImGui::SetNextWindowSize(ImVec2(300.0f, 320.0), ImGuiCond_Once);
   ImGui::SetNextWindowCollapsed(0, ImGuiCond_Once);
   ImGui::SetNextWindowPos(ImVec2(20.0f, 20.0f), ImGuiCond_Once);
   ImGui::SetNextWindowBgAlpha(0.2f);
-  if (ImGui::Begin("Force Control Panel")) {
+  if (ImGui::Begin("Control Panel")) {
     ImGui::Text("Press F9 to enable/disable mouse cursor.");
-    ImGui::Text("Shoot Force:");
-    ImGui::SliderFloat(" ", &shootForce, 1000.0f, 20000.0f);
+    ImGui::Text("\nShoot Force");
+    ImGui::SliderFloat("##Shoot Force", &shootForce, 1000.0f, 50000.0f);
+
+    ImGui::Text("\nRestitution Coefficient");
+    ImGui::SliderFloat("##Restitution Coefficient", &physics.coefRestitution, 0.0f, 1.0f);
+
+    ImGui::Text("\nKinematic Friction Coefficient");
+    ImGui::SliderFloat("##Kinematic Friction Coefficient", &physics.coefKineticFriction, 5.0f, 50.0f);
+
+    ImGui::Text("\nCamera Move Speed");
+    ImGui::InputFloat("##Camera Move Speed", currentCamera->getKeyboardMoveSpeedPointer(), 0.01f, 0.05f);
+
+    ImGui::Text("\nMouse Move Speed");
+    ImGui::InputFloat("##Mouse Move Speed", currentCamera->getMouseMoveSpeedPointer(), 0.0001f, 0.0005f, "%.4f");
   }
 
   ImGui::End();
@@ -141,7 +153,7 @@ void renderUI(GLFWwindow* window, simulation::Physics& physics) {
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
   if(physics.isDead) resetCueBallPanel(window, physics);
-  forceControlPanel();
+  controlPanel(physics);
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

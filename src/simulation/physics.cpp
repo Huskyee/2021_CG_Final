@@ -32,6 +32,8 @@ Physics::Physics()
 	: cueBallCount(16),
       deltaTime(0.01f),
       isDead(false),
+      coefRestitution(0.75f),
+      coefKineticFriction(20.0f),
       gravity(glm::vec3(0.0f, -9.8f, 0.0f))
 {
     //      y                _____6_____
@@ -112,7 +114,7 @@ void Physics::computeAllForce() {
 
   float d = 0.002f;
   float k = 1.9f;
-  float c = 0.9f;
+  float c = 0.95f;
 
   // ball and ball
   for (int i = 0; i < cueBallCount; i++) {
@@ -231,9 +233,7 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane) {
   //}
   
   constexpr float eEPSILON = 0.01f;
-  constexpr float coefResist = 0.8f;
-  constexpr float coefKineticFriction = 20.0f;
-  constexpr float coefStaticFriction = coefKineticFriction * 2.0f;
+  float coefStaticFriction = coefKineticFriction * 2.0f;
   constexpr float thresholdSlidingSpeed = 0.01f;
   constexpr float coefSpinningSpeedDown = 1.0f;
 
@@ -264,7 +264,7 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane) {
 
   if (onPlane) {
     if (headingIn) {
-      cueBall.setVelocity(vt + -coefResist * vn);
+      cueBall.setVelocity(vt + -coefRestitution * vn);
     }
     if (hasContactForce) {
       cueBall.addForce(-contactForce);

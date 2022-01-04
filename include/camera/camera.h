@@ -24,6 +24,8 @@ class Camera {
   void initialize(float aspectRatio);
   virtual bool move(GLFWwindow* window) = 0;
   virtual void updateProjection(float aspectRatio) = 0;
+  virtual float* getKeyboardMoveSpeedPointer() = 0;
+  virtual float* getMouseMoveSpeedPointer() = 0;
 
  protected:
   virtual void updateView() = 0;
