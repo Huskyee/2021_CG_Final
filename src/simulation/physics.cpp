@@ -165,27 +165,27 @@ void Physics::computeCueBallPairForce(CueBall& cueBallA, CueBall& cueBallB, floa
             cueBallA.addForce(AMass * (newASpeed - ASpeed) * ABDir / deltaTime);
             cueBallB.addForce(BMass * (newBSpeed - BSpeed) * ABDir / deltaTime);
 
-            if (AToBSpeed > 0.0f) {
-              glm::vec3 Va = cueBallA.getVelocity();
-              glm::vec3 ABVecProjOnVa = glm::dot(ABVec, Va) / (ABLength * glm::length(Va)) * ABVec;
-              float torqueRadius = glm::length(ABVec - ABVecProjOnVa);
-              bool isClockWise = glm::cross(Va, ABVec).y > 0.0f;
-              glm::vec3 torque = glm::vec3(0.0f, BMass * (newBSpeed-BSpeed) / deltaTime * torqueRadius, 0.0f);
-              if (glm::length(torque) > 0.0f) {
-                cueBallB.addTorque(torque * (isClockWise ? 1.0f : -1.0f));
-              }
-            }
+            //if (AToBSpeed > 0.0f) {
+            //  glm::vec3 Va = cueBallA.getVelocity();
+            //  glm::vec3 ABVecProjOnVa = glm::dot(ABVec, Va) / (ABLength * glm::length(Va)) * ABVec;
+            //  float torqueRadius = glm::length(ABVec - ABVecProjOnVa);
+            //  bool isClockWise = glm::cross(Va, ABVec).y > 0.0f;
+            //  glm::vec3 torque = glm::vec3(0.0f, BMass * (newBSpeed-BSpeed) / deltaTime * torqueRadius, 0.0f);
+            //  if (glm::length(torque) > 0.0f) {
+            //    cueBallB.addTorque(torque * (isClockWise ? 1.0f : -1.0f));
+            //  }
+            //}
 
-            if (BToASpeed > 0.0f) {
-              glm::vec3 Vb = cueBallB.getVelocity();
-              glm::vec3 BAVecProjOnVb = glm::dot(-ABVec, Vb) / (ABLength * glm::length(Vb)) * -ABVec;
-              float torqueRadius = glm::length(-ABVec - BAVecProjOnVb);
-              bool isClockWise = glm::cross(Vb, -ABVec).y > 0.0f;
-              glm::vec3 torque = glm::vec3(0.0f, AMass * (newASpeed-ASpeed) / deltaTime * torqueRadius, 0.0f);
-              if (glm::length(torque) > 0.0f) {
-                cueBallA.addTorque(torque * (isClockWise ? 1.0f : -1.0f));
-              }
-            }
+            //if (BToASpeed > 0.0f) {
+            //  glm::vec3 Vb = cueBallB.getVelocity();
+            //  glm::vec3 BAVecProjOnVb = glm::dot(-ABVec, Vb) / (ABLength * glm::length(Vb)) * -ABVec;
+            //  float torqueRadius = glm::length(-ABVec - BAVecProjOnVb);
+            //  bool isClockWise = glm::cross(Vb, -ABVec).y > 0.0f;
+            //  glm::vec3 torque = glm::vec3(0.0f, AMass * (newASpeed-ASpeed) / deltaTime * torqueRadius, 0.0f);
+            //  if (glm::length(torque) > 0.0f) {
+            //    cueBallA.addTorque(torque * (isClockWise ? 1.0f : -1.0f));
+            //  }
+            //}
         }
         // =========================================================
     }
@@ -243,22 +243,22 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane) {
   auto&& cueBallVelocity = cueBall.getVelocity();
   auto&& cueBallForce = cueBall.getForce();
   auto&& contactPoint = cueBallPosition - cueBallRadius * planeNormal;
-  auto&& centerToContactPoint = contactPoint - cueBallPosition;
-  auto&& contactForce = glm::dot(cueBallForce, planeNormal) * planeNormal;
-  contactForce = glm::dot(contactForce, planeNormal) < 0.0f ? contactForce : glm::zero<glm::vec3>();
+  auto&& ballCenterToContactPoint = contactPoint - cueBallPosition;
+
+  bool hasContactForce = glm::dot(planeNormal, cueBallForce) < 0;
+  auto&& contactForce = hasContactForce ? -glm::dot(planeNormal, cueBallForce) * planeNormal : glm::zero<glm::vec3>();
 
   auto&& vn = glm::dot(cueBallVelocity, planeNormal) * planeNormal;
   auto&& vt = cueBallVelocity - vn;
 
   auto&& cueBallAngularVelocity = cueBall.getAngularVelocity();
-  auto&& contactPointVelocityAngularTerm = glm::cross(cueBallAngularVelocity, centerToContactPoint);
+  auto&& contactPointVelocityAngularTerm = glm::cross(cueBallAngularVelocity, ballCenterToContactPoint);
   auto&& contactPointOnPlaneVelocityAngularTerm =
       contactPointVelocityAngularTerm - glm::dot(contactPointVelocityAngularTerm, planeNormal) * planeNormal;
   auto&& contactPointOnPlaneVelocity = vt + contactPointOnPlaneVelocityAngularTerm;
 
   bool onPlane = glm::dot(contactPoint - plane.getPosition(), planeNormal) < eEPSILON;
   bool headingIn = glm::dot(cueBallVelocity, planeNormal) < 0.0f;
-  bool hasContactForce = glm::length(contactForce) > 0.0f;
   bool sliding = glm::length(contactPointOnPlaneVelocity) > thresholdSlidingSpeed;
   bool rotatingAroundPlaneNormal = glm::dot(cueBallAngularVelocity, planeNormal) != 0.0f;
 
@@ -267,18 +267,34 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane) {
       cueBall.setVelocity(vt + -coefRestitution * vn);
     }
     if (hasContactForce) {
-      cueBall.addForce(-contactForce);
+      cueBall.addForce(contactForce);
     }
     if (sliding) { // sliding, use kinetic friction
       auto&& friction = -coefKineticFriction * contactPointOnPlaneVelocity;
-      auto&& torque = glm::cross(centerToContactPoint, friction);
+      //auto&& friction =
+      //    -coefKineticFriction * glm::dot(contactForce, planeNormal) * glm::normalize(contactPointOnPlaneVelocity);
+      auto&& torque = glm::cross(ballCenterToContactPoint, friction);
       cueBall.addForce(friction);
       cueBall.addTorque(torque);
     } else { // rolling or stationary, use static friction
-      auto&& friction = -coefStaticFriction * vt; // vt is 0 in case of stationary, so no friction will be applied
-      auto&& torque = glm::cross(centerToContactPoint, -friction);
-      cueBall.addForce(friction);
-      cueBall.addTorque(torque);
+      float maxStaticFriction = coefStaticFriction * glm::dot(contactForce, planeNormal);
+      auto&& alongPlaneForce = cueBallForce + contactForce;
+      if (glm::length(alongPlaneForce) <= maxStaticFriction) {
+        auto&& friction = -alongPlaneForce;
+        auto&& torque = glm::cross(ballCenterToContactPoint, friction);
+        cueBall.addForce(friction);
+        cueBall.addTorque(torque);
+      } else {
+        auto&& friction = -coefKineticFriction * glm::dot(contactForce, planeNormal) * glm::normalize(alongPlaneForce);
+        auto&& torque = glm::cross(ballCenterToContactPoint, friction);
+        cueBall.addForce(friction);
+        cueBall.addTorque(torque);
+      }
+
+      //auto&& friction = -coefStaticFriction * vt; // vt is 0 in case of stationary, so no friction will be applied
+      //auto&& torque = glm::cross(ballCenterToContactPoint, -friction);
+      //cueBall.addForce(friction);
+      //cueBall.addTorque(torque);
     }
     if (rotatingAroundPlaneNormal) {
       auto&& angularVelocityAlongPlaneNormal = glm::dot(cueBallAngularVelocity, planeNormal) * planeNormal;
