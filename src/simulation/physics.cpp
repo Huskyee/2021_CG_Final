@@ -33,7 +33,7 @@ Physics::Physics()
       deltaTime(0.01f),
       isDead(false),
       coefRestitution(0.75f),
-      coefKineticFriction(20.0f),
+      coefKineticFriction(5.0f),
       gravity(glm::vec3(0.0f, -9.8f, 0.0f))
 {
     //      y                _____6_____
@@ -272,13 +272,12 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane) {
     if (sliding) { // sliding, use kinetic friction
       auto&& friction =
           -coefKineticFriction * glm::length(contactForce) * glm::normalize(contactPointOnPlaneVelocity);
-      //auto&& friction = 10.0f * -coefKineticFriction * glm::normalize(contactPointOnPlaneVelocity);
       auto&& torque = glm::cross(ballCenterToContactPoint, friction);
       cueBall.addForce(friction);
       cueBall.addTorque(torque);
     } else { // rolling or stationary, use static friction
       float maxStaticFriction = coefStaticFriction * glm::length(contactForce);
-      auto&& alongPlaneForce = cueBallForce + contactForce;
+      auto&& alongPlaneForce = cueBallForce - glm::dot(cueBallForce, planeNormal) * planeNormal;
       if (glm::length(alongPlaneForce) <= maxStaticFriction) {
         auto&& friction = -alongPlaneForce;
         auto&& torque = glm::cross(ballCenterToContactPoint, friction);
@@ -286,7 +285,6 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane) {
         cueBall.addTorque(torque);
       } else {
         auto&& friction = -coefKineticFriction * glm::length(contactForce) * glm::normalize(alongPlaneForce);
-        //auto&& friction = 10.0f * -coefKineticFriction * glm::normalize(alongPlaneForce);
         auto&& torque = glm::cross(ballCenterToContactPoint, friction);
         cueBall.addForce(friction);
         cueBall.addTorque(torque);
@@ -297,6 +295,9 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane) {
       auto&& torque = -coefSpinningSpeedDown * angularVelocityAlongPlaneNormal;
       cueBall.addTorque(torque);
     }
+
+    cueBall.addForce(-0.3f * cueBall.getLinearMomentum());
+    cueBall.addTorque(-0.3f * cueBall.getAngularMomentum());
   }
 }
 

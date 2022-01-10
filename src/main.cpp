@@ -136,7 +136,7 @@ void controlPanel(simulation::Physics& physics) {
     ImGui::SliderFloat("##Restitution Coefficient", &physics.coefRestitution, 0.0f, 1.0f);
 
     ImGui::Text("\nKinematic Friction Coefficient");
-    ImGui::SliderFloat("##Kinematic Friction Coefficient", &physics.coefKineticFriction, 5.0f, 50.0f);
+    ImGui::SliderFloat("##Kinematic Friction Coefficient", &physics.coefKineticFriction, 1.0f, 10.0f);
 
     ImGui::Text("\nCamera Move Speed");
     ImGui::InputFloat("##Camera Move Speed", currentCamera->getKeyboardMoveSpeedPointer(), 0.01f, 0.05f);
