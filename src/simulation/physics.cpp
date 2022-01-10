@@ -270,14 +270,14 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane) {
       cueBall.addForce(contactForce);
     }
     if (sliding) { // sliding, use kinetic friction
-      auto&& friction = -coefKineticFriction * contactPointOnPlaneVelocity;
-      //auto&& friction =
-      //    -coefKineticFriction * glm::dot(contactForce, planeNormal) * glm::normalize(contactPointOnPlaneVelocity);
+      auto&& friction =
+          -coefKineticFriction * glm::length(contactForce) * glm::normalize(contactPointOnPlaneVelocity);
+      //auto&& friction = 10.0f * -coefKineticFriction * glm::normalize(contactPointOnPlaneVelocity);
       auto&& torque = glm::cross(ballCenterToContactPoint, friction);
       cueBall.addForce(friction);
       cueBall.addTorque(torque);
     } else { // rolling or stationary, use static friction
-      float maxStaticFriction = coefStaticFriction * glm::dot(contactForce, planeNormal);
+      float maxStaticFriction = coefStaticFriction * glm::length(contactForce);
       auto&& alongPlaneForce = cueBallForce + contactForce;
       if (glm::length(alongPlaneForce) <= maxStaticFriction) {
         auto&& friction = -alongPlaneForce;
@@ -285,16 +285,12 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane) {
         cueBall.addForce(friction);
         cueBall.addTorque(torque);
       } else {
-        auto&& friction = -coefKineticFriction * glm::dot(contactForce, planeNormal) * glm::normalize(alongPlaneForce);
+        auto&& friction = -coefKineticFriction * glm::length(contactForce) * glm::normalize(alongPlaneForce);
+        //auto&& friction = 10.0f * -coefKineticFriction * glm::normalize(alongPlaneForce);
         auto&& torque = glm::cross(ballCenterToContactPoint, friction);
         cueBall.addForce(friction);
         cueBall.addTorque(torque);
       }
-
-      //auto&& friction = -coefStaticFriction * vt; // vt is 0 in case of stationary, so no friction will be applied
-      //auto&& torque = glm::cross(ballCenterToContactPoint, -friction);
-      //cueBall.addForce(friction);
-      //cueBall.addTorque(torque);
     }
     if (rotatingAroundPlaneNormal) {
       auto&& angularVelocityAlongPlaneNormal = glm::dot(cueBallAngularVelocity, planeNormal) * planeNormal;
