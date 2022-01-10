@@ -247,7 +247,7 @@ void Physics::computeCueBallTableForce(CueBall& cueBall, const MPlane& plane) {
   auto&& contactForce = glm::dot(cueBallForce, planeNormal) * planeNormal;
   contactForce = glm::dot(contactForce, planeNormal) < 0.0f ? contactForce : glm::zero<glm::vec3>();
 
-  auto&& vn = glm::dot(cueBallVelocity, planeNormal) * planeNormal;
+  auto&& vn = float(glm::dot(cueBallVelocity, -planeNormal) / pow(glm::length(-planeNormal), 2)) * (-planeNormal);
   auto&& vt = cueBallVelocity - vn;
 
   auto&& cueBallAngularVelocity = cueBall.getAngularVelocity();
