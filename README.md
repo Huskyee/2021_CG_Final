@@ -8,8 +8,3 @@
 
 ## Demo
 https://user-images.githubusercontent.com/50997488/163322338-aa106bcf-fa1b-41d4-8c58-31b76b31dbd1.mp4
-
-## Distribution
-* 邱兆國：球桌建模、控制面板、受力計算、遊戲邏輯、球與桌面碰撞
-* 洪至德：球與球碰撞、球與球碰撞造成旋轉
-* 洪煥璋：球與球碰撞、球與桌面摩擦力造成旋轉
